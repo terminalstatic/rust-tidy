@@ -2,15 +2,11 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use tidy::*;
 use std::boxed::Box;
 use std::error::Error;
-use std::ffi::CStr;
-use std::ffi::CString;
-use std::fmt;
-use std::io::{self, Write};
 use std::thread;
-use std::time::Duration;
+//use std::io::{self, Write};
+//use std::time::Duration;
 
 fn test_sub() -> Result<(), Box<dyn Error>> {
   let xml = "        
@@ -92,12 +88,17 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
 
   Ok(())
 }
+
 pub fn main() -> Result<(), Box<dyn Error>> {
   let handle = thread::spawn(|| {
     for _i in 1..2 {
-      test_sub();
+      match test_sub() {
+        Err(_e)=> panic!(),
+        _ => ()
+
+      }
       //thread::sleep(Duration::from_millis(10));
-    }
+    }    
   });
 
   handle.join().unwrap();

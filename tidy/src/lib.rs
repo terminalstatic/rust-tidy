@@ -8,9 +8,6 @@ use std::error::Error;
 use std::ffi::CStr;
 use std::ffi::CString;
 use std::fmt;
-use std::io::{self, Write};
-use std::thread;
-use std::time::Duration;
 
 include!("bindings.rs");
 
