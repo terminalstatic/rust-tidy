@@ -1,6 +1,6 @@
 [package]
 name = "tidy"
-version = "0.1.1"
+version = "0.1.2-alpha.0"
 authors = ["Wolfgang Grimm <grimm@mondial.at>"]
 edition = "2018"
 links = "tidy"
