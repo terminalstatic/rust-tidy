@@ -1,3 +1,4 @@
+./src
 /target
 /src/buffio.rs
 tidyOpts.cfg

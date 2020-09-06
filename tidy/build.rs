@@ -20,7 +20,10 @@ valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose -
 */
 extern crate pkg_config;
 
+
 fn main() -> Result<(), Box<dyn Error>> {
+    let out_fn = "src/bindings.rs";
+
     pkg_config::Config::new()
         .atleast_version("5.2.0")
         .probe("tidy")
@@ -41,11 +44,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         .expect("Unable to generate bindings");
 
     bindings
-        .write_to_file("src/tidy.rs")
+        .write_to_file(out_fn)
         .expect("Couldn't write bindings!");
 
     let re = Regex::new(r"(?s)pub struct _TidyOption \{.+?\}").unwrap();
-    let mut file_r = OpenOptions::new().read(true).open("src/tidy.rs")?;
+    let mut file_r = OpenOptions::new().read(true).open(out_fn)?;
 
     let mut contents = String::new();
     file_r.read_to_string(&mut contents)?;
@@ -62,7 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut file_w = OpenOptions::new()
         .write(true)
         .truncate(true)
-        .open("src/tidy.rs")?;
+        .open(out_fn)?;
     file_w.write(replaced.as_bytes())?;
     drop(file_w);
 

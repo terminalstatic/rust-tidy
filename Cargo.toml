@@ -1,18 +1,5 @@
-[package]
-name = "rust-tidy"
-version = "0.0.1"
-links = "tidy"
-build = "build.rs"
-authors = ["Wolfgang Grimm <grimm@mondial.at>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-libc = "0.2"
-
-[build-dependencies]
-regex = "1"
-bindgen = "0.55"
-cc = { version = "1.0", features = ["parallel"] }
-pkg-config = "0.3"
+[workspace]
+members = [
+    "tidy",
+    "tidy-test",
+]
