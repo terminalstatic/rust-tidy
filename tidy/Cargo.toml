@@ -5,6 +5,7 @@ authors = ["Wolfgang Grimm <grimm@mondial.at>"]
 edition = "2018"
 links = "tidy"
 build = "build.rs"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
