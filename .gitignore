@@ -4,5 +4,6 @@
 tidyOpts.cfg
 tidyOut.xml
 valgrind*
+release.toml
 *.rs_
 Cargo.lock

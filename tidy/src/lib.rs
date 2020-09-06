@@ -575,7 +575,6 @@ impl Drop for Tidy {
       libc::free(self.output as *mut libc::c_void);
       //println! {"{:?}", *self.output}
       tidyRelease(self.tdoc);
-      println!("All is tidy and free.")
     }
   }
 }
