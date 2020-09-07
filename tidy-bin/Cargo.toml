@@ -1,5 +1,5 @@
 [package]
-name = "tidy-test"
+name = "tidy-bin"
 version = "0.1.3-alpha.0"
 authors = ["Wolfgang Grimm <grimm@mondial.at>"]
 edition = "2018"

@@ -5,6 +5,7 @@
 use std::boxed::Box;
 use std::error::Error;
 use std::thread;
+use tidy::TidyUtil;
 //use std::io::{self, Write};
 //use std::time::Duration;
 
@@ -43,47 +44,46 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
     </food>
   </breakfast_menu>";
   let tidy = tidy::Tidy::new()?;
-  println!("Tidy release date: {}", tidy.tidyReleaseDate());
-  println!("Tidy library version: {}", tidy.tidyLibraryVersion());
+  println!("Tidy release date: {}", tidy.release_date());
+  println!("Tidy library version: {}", tidy.library_version());
 
-  tidy.tidyOptSetBool(tidy::TidyOptionId::TidyXmlTags, true)?;
-  tidy.tidyOptSetBool(tidy::TidyOptionId::TidyXmlDecl, true)?;
+  tidy.opt_set_bool(tidy::TidyOptionId::TidyXmlTags, true)?;
+  tidy.opt_set_bool(tidy::TidyOptionId::TidyXmlDecl, true)?;
 
-  let option: tidy::_TidyOption = unsafe { *tidy.tidyGetOption(tidy::TidyOptionId::TidyForceOutput) };
+  let option: tidy::_TidyOption = unsafe { *tidy.get_option(tidy::TidyOptionId::TidyForceOutput) };
   let option_ptr = &option as tidy::TidyOption;
-  println!("{:?}", tidy::Tidy::tidyOptGetName(option_ptr));
-  println!("ID: {:?}", tidy::Tidy::tidyOptGetId(option_ptr));
+  println!("{:?}", tidy::Tidy::opt_get_name(option_ptr));
+  println!("ID: {:?}", tidy::Tidy::opt_get_id(option_ptr));
   println!("Option: {:?}", option);
-  tidy.tidySetCharEncoding("utf8")?;
-  tidy.tidySetOutCharEncoding("utf8")?;
-  tidy.tidyParseString(xml.as_bytes().to_vec())?;
+  tidy.set_char_encoding("utf8")?;
+  tidy.set_out_char_encoding("utf8")?;
+  tidy.parse_string(xml.as_bytes().to_vec())?;
   //tidy.tidyParseFile("./test.xml")?;
 
-  println!("Tidy html version: {}", tidy.tidyDetectedHtmlVersion());
+  println!("Tidy html version: {}", tidy.detected_html_version());
 
-  tidy.tidyCleanAndRepair()?;
-  match tidy.tidyRunDiagnostics() {
+  tidy.clean_and_repair()?;
+  match tidy.run_diagnostics() {
     Ok(v) => match v {
       tidy::TidySeverity::Error => {
-        tidy.tidyOptSetBool(tidy::TidyOptionId::TidyForceOutput, true)?;
+        tidy.opt_set_bool(tidy::TidyOptionId::TidyForceOutput, true)?;
       }
       _ => (),
     },
     Err(e) => return Err(Box::new(e)),
   }
 
-  println!("Tidy tdoc status: {}", tidy.tidyStatus());
-  println!("Tidy xml?: {}", tidy.tidyDetectedGenericXml());
-  println!("Tidy xhtml?: {}", tidy.tidyDetectedXhtml());
+  println!("Tidy tdoc status: {}", tidy.status());
+  println!("Tidy xml?: {}", tidy.detected_generic_xml());
+  println!("Tidy xhtml?: {}", tidy.detected_xhtml());
 
-  println!("Tidy warning count: {}", tidy.tidyWarningCount());
-  println!("Tidy error count: {}", tidy.tidyErrorCount());
+  println!("Tidy warning count: {}", tidy.warning_count());
+  println!("Tidy error count: {}", tidy.error_count());
 
-  tidy.tidyErrorSummary();
-  println!("\nDiagnostics:\n\n {}", tidy.errbuf_as_string());
+  println!("\nDiagnostics:\n\n {}", TidyUtil::errbuf_as_string(&tidy));
   //tidy.tidySaveBuffer()?;
-  tidy.tidySaveStdout()?;
-  tidy.tidyOptSaveFile("./tidyOpts.cfg")?;
+  tidy.save_stdout()?;
+  tidy.opt_save_file("./tidyOpts.cfg")?;
   //io::stdout().write_all(&tidy.output_as_vector().unwrap())?;
 
   Ok(())
@@ -93,12 +93,11 @@ pub fn main() -> Result<(), Box<dyn Error>> {
   let handle = thread::spawn(|| {
     for _i in 1..2 {
       match test_sub() {
-        Err(_e)=> panic!(),
-        _ => ()
-
+        Err(_e) => panic!(),
+        _ => (),
       }
       //thread::sleep(Duration::from_millis(10));
-    }    
+    }
   });
 
   handle.join().unwrap();
