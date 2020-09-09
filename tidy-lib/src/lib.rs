@@ -73,6 +73,19 @@ impl TidyUtil {
     unsafe { TidyUtil::c_str_to_owned((*tidy.errbuf).bp as *const i8) }
   }
 }
+
+impl Default for TidyBuffer {
+  fn default() -> Self {
+    return Self {
+      allocator: std::ptr::null_mut(),
+      bp: std::ptr::null_mut(),
+      size: 0,
+      allocated: 0,
+      next: 0,
+    };
+  }
+}
+
 pub struct Tidy {
   errbuf: *mut TidyBuffer,
   output: *mut TidyBuffer,
@@ -81,12 +94,12 @@ pub struct Tidy {
 
 impl Tidy {
   pub fn new() -> Result<Tidy, TidyError> {
-    // TODO find better approach
-    let errbuf: TidyBuffer = unsafe { std::mem::zeroed() };
+
+    let errbuf: TidyBuffer = Default::default();
     let b_errbuf = Box::from(errbuf);
     let p_errbuf = Box::into_raw(b_errbuf);
 
-    let output: TidyBuffer = unsafe { std::mem::zeroed() };
+    let output: TidyBuffer = Default::default();
     let b_output = Box::from(output);
     let p_output = Box::into_raw(b_output);
 
@@ -849,14 +862,13 @@ impl Drop for Tidy {
       //println! {"{:?}", *self.errbuf}
       if !(*self.errbuf).bp.is_null() {
         tidyBufFree(self.errbuf);
-      }
-      libc::free(self.errbuf as *mut libc::c_void);
+      }      
+      Box::from_raw(self.errbuf);
       //println! {"{:?}", *self.errbuf}
-      //println! {"{:?}", *self.output}
       if !(*self.output).bp.is_null() {
         tidyBufFree(self.output);
-      }
-      libc::free(self.output as *mut libc::c_void);
+      }      
+      Box::from_raw(self.output);
       //println! {"{:?}", *self.output}
       tidyRelease(self.tdoc);
     }

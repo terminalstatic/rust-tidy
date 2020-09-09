@@ -50,10 +50,8 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
   tidy.opt_set_bool(TidyOptionId::TidyXmlTags, true)?;
   tidy.opt_set_bool(TidyOptionId::TidyXmlDecl, true)?;
 
-  let option: _TidyOption = unsafe { *tidy.get_option(TidyOptionId::TidyForceOutput) };
-  let option_ptr = &option as TidyOption;
-  println!("{:?}", Tidy::opt_get_name(option_ptr));
-  println!("ID: {:?}", Tidy::opt_get_id(option_ptr));
+  let option: TidyOption = tidy.get_option(TidyOptionId::TidyForceOutput);
+    println!("ID: {:?}", Tidy::opt_get_id(option));
   println!("Option: {:?}", option);
   tidy.set_char_encoding("utf8")?;
   tidy.set_out_char_encoding("utf8")?;
