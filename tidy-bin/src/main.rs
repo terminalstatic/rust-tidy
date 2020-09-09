@@ -4,8 +4,8 @@
 
 use std::boxed::Box;
 use std::error::Error;
-use std::thread;
-use tidy::TidyUtil;
+use tidy::*;
+//use std::thread;
 //use std::io::{self, Write};
 //use std::time::Duration;
 
@@ -43,17 +43,17 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
       <calories>950</calories>
     </food>
   </breakfast_menu>";
-  let tidy = tidy::Tidy::new()?;
+  let tidy = Tidy::new()?;
   println!("Tidy release date: {}", tidy.release_date());
   println!("Tidy library version: {}", tidy.library_version());
 
-  tidy.opt_set_bool(tidy::TidyOptionId::TidyXmlTags, true)?;
-  tidy.opt_set_bool(tidy::TidyOptionId::TidyXmlDecl, true)?;
+  tidy.opt_set_bool(TidyOptionId::TidyXmlTags, true)?;
+  tidy.opt_set_bool(TidyOptionId::TidyXmlDecl, true)?;
 
-  let option: tidy::_TidyOption = unsafe { *tidy.get_option(tidy::TidyOptionId::TidyForceOutput) };
-  let option_ptr = &option as tidy::TidyOption;
-  println!("{:?}", tidy::Tidy::opt_get_name(option_ptr));
-  println!("ID: {:?}", tidy::Tidy::opt_get_id(option_ptr));
+  let option: _TidyOption = unsafe { *tidy.get_option(TidyOptionId::TidyForceOutput) };
+  let option_ptr = &option as TidyOption;
+  println!("{:?}", Tidy::opt_get_name(option_ptr));
+  println!("ID: {:?}", Tidy::opt_get_id(option_ptr));
   println!("Option: {:?}", option);
   tidy.set_char_encoding("utf8")?;
   tidy.set_out_char_encoding("utf8")?;
@@ -65,8 +65,8 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
   tidy.clean_and_repair()?;
   match tidy.run_diagnostics() {
     Ok(v) => match v {
-      tidy::TidySeverity::Error => {
-        tidy.opt_set_bool(tidy::TidyOptionId::TidyForceOutput, true)?;
+      TidySeverity::Error => {
+        tidy.opt_set_bool(TidyOptionId::TidyForceOutput, true)?;
       }
       _ => (),
     },
@@ -90,17 +90,17 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
 }
 
 pub fn main() -> Result<(), Box<dyn Error>> {
-  let handle = thread::spawn(|| {
+  test_sub()
+  /*let handle = thread::spawn(|| {
     for _i in 1..2 {
-      match test_sub() {
+      match  {
         Err(_e) => panic!(),
         _ => (),
       }
-      //thread::sleep(Duration::from_millis(10));
     }
   });
 
   handle.join().unwrap();
 
-  Ok(())
+  Ok(())*/
 }
