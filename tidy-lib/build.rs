@@ -1,10 +1,14 @@
 extern crate bindgen;
 extern crate regex;
 
+use glob::glob;
+use glob::Paths;
 use regex::Regex;
 use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
+use std::iter::Iterator;
+use std::path;
 
 /*bindgen wrapper.h -o src/tidy.rs --rustified-enum '^Tidy.*' --whitelist-function '^tidy.*' --whitelist-var '^tidy.*'
 
@@ -20,17 +24,76 @@ valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose -
 */
 extern crate pkg_config;
 
+fn strip_to_include(mut paths: Paths, prefix: &str) -> Option<String> {
+    let next = paths.next();
+    match next {
+        Some(v) => {
+            let p = v.unwrap().into_os_string().into_string().unwrap();
+            let mut r = p.trim_start_matches(prefix);
+            if path::is_separator(r.chars().next().unwrap()) {
+                r = &r[1..]
+            }
+            println!("Entry: {} {}", p, r);
+            return Some(r.to_string());
+        }
+        _ => None,
+    }
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let out_fn = "src/bindings.rs";
 
-    pkg_config::Config::new()
+    let lib = pkg_config::Config::new()
         .atleast_version("5.2.0")
         .probe("tidy")
         .unwrap();
 
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+
+    if lib.include_paths.len() == 0 {
+        panic!("No include dir found, can't find tidy.h/buffio.h")
+    }
+
+    let h_files: [&str; 2] = ["tidy.h", "buffio.h"];
+    let mut includes: [Option<String>; 2] = Default::default();
+
+    for (i, find) in h_files.iter().enumerate() {
+        for dir in &lib.include_paths {
+            let fileglob1 = dir.join("**").join(find);
+            //let fileglob2 = dir.join("**").join("buffio.h");
+            let mut i1 = strip_to_include(
+                glob(fileglob1.to_str().unwrap()).unwrap(),
+                dir.clone().into_os_string().to_str().unwrap(),
+            );
+            if i1.is_some() {
+                includes[i] = i1.take();
+                break;
+            }
+        }
+    }
+
+    if !(includes[0].is_some() && includes[1].is_some()) {
+        panic!("Required include files tidy.h/buffio.h not found")
+    }
+
+    let wrapper_path = path::Path::new(&out_dir).join("wrapper.h");
+    let mut file_w = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(&wrapper_path)?;
+
+    let h_text: String = format!(
+        "#include <{}>\n#include <{}>\n",
+        includes[0].as_ref().unwrap(),
+        includes[1].as_ref().unwrap()
+    );
+
+    file_w.write(h_text.as_bytes())?;
+    drop(file_w);
+
     let bindings = bindgen::Builder::default()
-        .header("wrapper.h")
+        .header(wrapper_path.to_path_buf().to_str().unwrap())
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .rustified_enum("^Tidy.*")
@@ -52,7 +115,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut contents = String::new();
     file_r.read_to_string(&mut contents)?;
-    //println!("{}", contents);
+
     drop(file_r);
     assert!(re.is_match(&contents));
 
@@ -62,10 +125,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         pub name: ctmbstr,
     }";
     let replaced = re.replace(&contents, new_val);
-    let mut file_w = OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .open(out_fn)?;
+    let mut file_w = OpenOptions::new().write(true).truncate(true).open(out_fn)?;
     file_w.write(replaced.as_bytes())?;
     drop(file_w);
 
