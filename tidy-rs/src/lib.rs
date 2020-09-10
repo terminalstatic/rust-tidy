@@ -21,6 +21,10 @@
 //!   },
 //!   Err(e) => return Err(Box::new(e)),
 //! }
+//! 
+//! tidy.save_buffer()?;
+//! println!("\nDiagnostics:\n\n {}", TidyUtil::errbuf_as_string(&tidy));
+//! print!("{}", String::from_utf8_lossy(&TidyUtil::output_as_vector(&tidy).unwrap()));
 //! # Ok(())
 //! # }
 //! ```
@@ -104,14 +108,15 @@ impl TidyUtil {
     }
     None
   }
+
   pub fn errbuf_as_string(tidy: &Tidy) -> String {
     unsafe { TidyUtil::c_str_to_owned((*tidy.errbuf).bp as *const i8) }
   }
 }
 
 pub struct Tidy {
-  errbuf: *mut TidyBuffer,
-  output: *mut TidyBuffer,
+  pub errbuf: *mut TidyBuffer,
+  pub output: *mut TidyBuffer,
   tdoc: TidyDoc,
 }
 

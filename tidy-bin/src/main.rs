@@ -81,10 +81,11 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
   println!("Tidy error count: {}", tidy.error_count());
 
   println!("\nDiagnostics:\n\n {}", TidyUtil::errbuf_as_string(&tidy));
-  //tidy.tidySaveBuffer()?;
-  tidy.save_stdout()?;
-  tidy.opt_save_file("./tidyOpts.cfg")?;
-  //io::stdout().write_all(&tidy.output_as_vector().unwrap())?;
+  tidy.save_buffer()?;
+  //tidy.save_stdout()?;
+  
+  //tidy.opt_save_file("./tidyOpts.cfg")?;
+  print!("{}", String::from_utf8_lossy(&TidyUtil::output_as_vector(&tidy).unwrap()));
 
   Ok(())
 }
