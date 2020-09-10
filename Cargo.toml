@@ -1,5 +1,6 @@
 [workspace]
 members = [
-    "tidy-lib",
+    "tidy-sys",
+    "tidy-rs",
     "tidy-bin",
 ]

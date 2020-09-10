@@ -2,14 +2,19 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+extern crate tidy_sys;
+
 use libc::*;
 use std::boxed::Box;
 use std::error::Error;
 use std::ffi::CStr;
 use std::ffi::CString;
 use std::fmt;
+use tidy_sys::*;
 
-include!("bindings.rs");
+pub type TidyOptionId = tidy_sys::TidyOptionId;
+pub type TidyOption = tidy_sys::TidyOption;
+pub type TidyConfigCategory = tidy_sys::TidyConfigCategory;
 
 #[derive(Debug, Clone)]
 pub enum TidySeverity {
@@ -74,18 +79,6 @@ impl TidyUtil {
   }
 }
 
-impl Default for TidyBuffer {
-  fn default() -> Self {
-    return Self {
-      allocator: std::ptr::null_mut(),
-      bp: std::ptr::null_mut(),
-      size: 0,
-      allocated: 0,
-      next: 0,
-    };
-  }
-}
-
 pub struct Tidy {
   errbuf: *mut TidyBuffer,
   output: *mut TidyBuffer,
@@ -94,7 +87,6 @@ pub struct Tidy {
 
 impl Tidy {
   pub fn new() -> Result<Tidy, TidyError> {
-
     let errbuf: TidyBuffer = Default::default();
     let b_errbuf = Box::from(errbuf);
     let p_errbuf = Box::into_raw(b_errbuf);
@@ -862,12 +854,12 @@ impl Drop for Tidy {
       //println! {"{:?}", *self.errbuf}
       if !(*self.errbuf).bp.is_null() {
         tidyBufFree(self.errbuf);
-      }      
+      }
       Box::from_raw(self.errbuf);
       //println! {"{:?}", *self.errbuf}
       if !(*self.output).bp.is_null() {
         tidyBufFree(self.output);
-      }      
+      }
       Box::from_raw(self.output);
       //println! {"{:?}", *self.output}
       tidyRelease(self.tdoc);

@@ -3,14 +3,13 @@ name = "tidy"
 version = "0.1.6"
 authors = ["Wolfgang Grimm <grimm@mondial.at>"]
 edition = "2018"
-links = "tidy"
-build = "build.rs"
 publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 libc = "0.2"
+tidy-sys = { path = "../tidy-sys" }
 
 [build-dependencies]
 regex = "1"
@@ -18,3 +17,4 @@ bindgen = "0.55"
 cc = { version = "1.0", features = ["parallel"] }
 pkg-config = "0.3"
 glob = "0.3.0"
+
