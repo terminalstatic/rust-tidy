@@ -10,18 +10,6 @@ use std::io::prelude::*;
 use std::iter::Iterator;
 use std::path;
 
-/*bindgen wrapper.h -o src/tidy.rs --rustified-enum '^Tidy.*' --whitelist-function '^tidy.*' --whitelist-var '^tidy.*'
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct _TidyOption {
-    pub TidyOptionId: ::std::os::raw::c_int,
-    pub TidyConfigCategory: TidyConfigCategory,
-    pub name: ctmbstr,
-}
-
-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt --sim-hints=no-nptl-pthread-stackcache target/debug/rust-tidy
-*/
 extern crate pkg_config;
 
 fn strip_to_include(mut paths: Paths, prefix: &str) -> Option<String> {
@@ -59,10 +47,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     for (i, find) in h_files.iter().enumerate() {
         for dir in &lib.include_paths {
-            let fileglob1 = dir.join("**").join(find);
-            //let fileglob2 = dir.join("**").join("buffio.h");
+            let fileglob = dir.join("**").join(find);
             let mut i1 = strip_to_include(
-                glob(fileglob1.to_str().unwrap()).unwrap(),
+                glob(fileglob.to_str().unwrap()).unwrap(),
                 dir.clone().into_os_string().to_str().unwrap(),
             );
             if i1.is_some() {
@@ -94,16 +81,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let bindings = bindgen::Builder::default()
         .header(wrapper_path.to_path_buf().to_str().unwrap())
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
         .rustified_enum("^Tidy.*")
         .whitelist_function("^tidy.*")
         .whitelist_var("^tidy.*")
         .layout_tests(false)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Finish the builder and generate the bindings.
         .generate()
-        // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
 
     bindings
