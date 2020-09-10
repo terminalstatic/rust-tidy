@@ -1,3 +1,30 @@
+//! ```
+//! use std::boxed::Box;
+//! use std::error::Error;
+//! use tidy::*;
+//! 
+//! # pub fn main() -> Result<(), Box<dyn Error>> {
+//! let xml = "<test>5 < 6 and 9 > 7</test>";
+//! let tidy = Tidy::new()?;
+//! tidy.opt_set_bool(TidyOptionId::TidyXmlTags, true)?;
+//! tidy.set_char_encoding("utf8")?;
+//! 
+//! tidy.parse_string(xml.as_bytes().to_vec())?;
+//! 
+//! tidy.clean_and_repair()?;
+//! match tidy.run_diagnostics() {
+//!   Ok(v) => match v {
+//!     TidySeverity::Error => {
+//!       tidy.opt_set_bool(TidyOptionId::TidyForceOutput, true)?;
+//!     }
+//!     _ => (),
+//!   },
+//!   Err(e) => return Err(Box::new(e)),
+//! }
+//! # Ok(())
+//! # }
+//! ```
+
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
@@ -12,8 +39,11 @@ use std::ffi::CString;
 use std::fmt;
 use tidy_sys::*;
 
+/// See [Html tidy docs](http://api.html-tidy.org/tidy/tidylib_api_5.6.0/group__public__enumerations.html)
 pub type TidyOptionId = tidy_sys::TidyOptionId;
+/// See [Html tidy docs](http://api.html-tidy.org/tidy/tidylib_api_5.6.0/group__public__enumerations.html)
 pub type TidyOption = tidy_sys::TidyOption;
+/// See [Html tidy docs](http://api.html-tidy.org/tidy/tidylib_api_5.6.0/group__public__enumerations.html)
 pub type TidyConfigCategory = tidy_sys::TidyConfigCategory;
 
 #[derive(Debug, Clone)]

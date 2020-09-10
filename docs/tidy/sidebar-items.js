@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["TidySeverity",""]],"struct":[["Tidy",""],["TidyError",""],["TidyUtil",""]],"type":[["TidyConfigCategory",""],["TidyOption",""],["TidyOptionId",""]]});
+initSidebarItems({"enum":[["TidySeverity",""]],"struct":[["Tidy",""],["TidyError",""],["TidyUtil",""]],"type":[["TidyConfigCategory","See Html tidy docs"],["TidyOption","See Html tidy docs"],["TidyOptionId","See Html tidy docs"]]});

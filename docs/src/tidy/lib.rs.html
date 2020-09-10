@@ -866,7 +866,64 @@
 <span id="866">866</span>
 <span id="867">867</span>
 <span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! use std::boxed::Box;</span>
+<span class="doccomment">//! use std::error::Error;</span>
+<span class="doccomment">//! use tidy::*;</span>
+<span class="doccomment">//! </span>
+<span class="doccomment">//! # pub fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {</span>
+<span class="doccomment">//! let xml = &quot;&lt;test&gt;5 &lt; 6 and 9 &gt; 7&lt;/test&gt;&quot;;</span>
+<span class="doccomment">//! let tidy = Tidy::new()?;</span>
+<span class="doccomment">//! tidy.opt_set_bool(TidyOptionId::TidyXmlTags, true)?;</span>
+<span class="doccomment">//! tidy.set_char_encoding(&quot;utf8&quot;)?;</span>
+<span class="doccomment">//! </span>
+<span class="doccomment">//! tidy.parse_string(xml.as_bytes().to_vec())?;</span>
+<span class="doccomment">//! </span>
+<span class="doccomment">//! tidy.clean_and_repair()?;</span>
+<span class="doccomment">//! match tidy.run_diagnostics() {</span>
+<span class="doccomment">//!   Ok(v) =&gt; match v {</span>
+<span class="doccomment">//!     TidySeverity::Error =&gt; {</span>
+<span class="doccomment">//!       tidy.opt_set_bool(TidyOptionId::TidyForceOutput, true)?;</span>
+<span class="doccomment">//!     }</span>
+<span class="doccomment">//!     _ =&gt; (),</span>
+<span class="doccomment">//!   },</span>
+<span class="doccomment">//!   Err(e) =&gt; return Err(Box::new(e)),</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//! # Ok(())</span>
+<span class="doccomment">//! # }</span>
+<span class="doccomment">//! ```</span>
+
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_upper_case_globals</span>)]</span>
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_camel_case_types</span>)]</span>
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
@@ -881,8 +938,11 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">tidy_sys</span>::<span class="kw-2">*</span>;
 
+<span class="doccomment">/// See [Html tidy docs](http://api.html-tidy.org/tidy/tidylib_api_5.6.0/group__public__enumerations.html)</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TidyOptionId</span> <span class="op">=</span> <span class="ident">tidy_sys</span>::<span class="ident">TidyOptionId</span>;
+<span class="doccomment">/// See [Html tidy docs](http://api.html-tidy.org/tidy/tidylib_api_5.6.0/group__public__enumerations.html)</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TidyOption</span> <span class="op">=</span> <span class="ident">tidy_sys</span>::<span class="ident">TidyOption</span>;
+<span class="doccomment">/// See [Html tidy docs](http://api.html-tidy.org/tidy/tidylib_api_5.6.0/group__public__enumerations.html)</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TidyConfigCategory</span> <span class="op">=</span> <span class="ident">tidy_sys</span>::<span class="ident">TidyConfigCategory</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
