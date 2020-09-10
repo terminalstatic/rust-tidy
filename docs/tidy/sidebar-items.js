@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["TidySeverity",""]],"struct":[["Tidy",""],["TidyError",""],["TidyUtil",""]],"type":[["TidyConfigCategory",""],["TidyOption",""],["TidyOptionId",""]]});
