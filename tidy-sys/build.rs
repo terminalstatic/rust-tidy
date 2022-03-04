@@ -10,6 +10,7 @@ use std::io::prelude::*;
 use std::iter::Iterator;
 use std::path;
 
+#[cfg(feature = "pkg-config")]
 extern crate pkg_config;
 
 fn strip_to_include(mut paths: Paths, prefix: &str) -> Option<String> {
@@ -22,36 +23,54 @@ fn strip_to_include(mut paths: Paths, prefix: &str) -> Option<String> {
                 r = &r[1..]
             }
             println!("Entry: {} {}", p, r);
-            return Some(r.to_string());
+            Some(r.to_string())
         }
         _ => None,
     }
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let out_fn = "src/bindings.rs";
-
-    let lib = pkg_config::Config::new()
-        .atleast_version("5.2.0")
-        .probe("tidy")
-        .unwrap();
-
-    let out_dir = std::env::var("OUT_DIR").unwrap();
+#[cfg(feature = "pkg-config")]
+fn pkg_config() -> Vec<path::PathBuf> {
+    let lib = pkg_config::Config::new().atleast_version("5.2.0").probe("tidy").unwrap();
 
     if lib.include_paths.len() == 0 {
         panic!("No include dir found, can't find tidy.h/buffio.h")
     }
 
+    println!("cargo:rustc-link-lib=tidy");
+    lib.include_paths
+}
+
+#[cfg(not(feature = "pkg-config"))]
+fn pkg_config() -> Vec<path::PathBuf> {
+    unimplemented!()
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let out_fn = "src/bindings.rs";
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+    let wrapper_path = path::Path::new(&out_dir).join("wrapper.h");
+
+    let includes_path = if cfg!(feature = "pkg-config") {
+        pkg_config()
+    } else {
+        let dst = cmake::Config::new("tidy-html5").define("TIDY_COMPAT_HEADERS", "ON").build();
+        println!("cargo:rustc-link-search=native={}/lib", dst.display());
+        println!("cargo:rustc-link-lib=static=tidy");
+        let mut include_path = path::PathBuf::new();
+        include_path.push(dst);
+        include_path.push("include");
+
+        vec![include_path]
+    };
+
     let h_files: [&str; 2] = ["tidy.h", "buffio.h"];
     let mut includes: [Option<String>; 2] = Default::default();
 
     for (i, find) in h_files.iter().enumerate() {
-        for dir in &lib.include_paths {
+        for dir in &includes_path {
             let fileglob = dir.join("**").join(find);
-            let mut i1 = strip_to_include(
-                glob(fileglob.to_str().unwrap()).unwrap(),
-                dir.clone().into_os_string().to_str().unwrap(),
-            );
+            let mut i1 = strip_to_include(glob(fileglob.to_str().unwrap()).unwrap(), dir.clone().into_os_string().to_str().unwrap());
             if i1.is_some() {
                 includes[i] = i1.take();
                 break;
@@ -63,35 +82,25 @@ fn main() -> Result<(), Box<dyn Error>> {
         panic!("Required include files tidy.h/buffio.h not found")
     }
 
-    let wrapper_path = path::Path::new(&out_dir).join("wrapper.h");
-    let mut file_w = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(&wrapper_path)?;
+    let mut file_w = OpenOptions::new().create(true).write(true).truncate(true).open(&wrapper_path)?;
 
-    let h_text: String = format!(
-        "#include <{}>\n#include <{}>\n",
-        includes[0].as_ref().unwrap(),
-        includes[1].as_ref().unwrap()
-    );
+    let h_text: String = format!("#include <{}>\n#include <{}>\n", includes[0].as_ref().unwrap(), includes[1].as_ref().unwrap());
 
-    file_w.write(h_text.as_bytes())?;
+    file_w.write_all(h_text.as_bytes())?;
     drop(file_w);
 
     let bindings = bindgen::Builder::default()
-        .header(wrapper_path.to_path_buf().to_str().unwrap())
+        .header(wrapper_path.to_str().unwrap())
         .rustified_enum("^Tidy.*")
         .whitelist_function("^tidy.*")
         .whitelist_var("^tidy.*")
         .layout_tests(false)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .clang_arg(format!("-I{}", includes_path[0].display()))
         .generate()
         .expect("Unable to generate bindings");
 
-    bindings
-        .write_to_file(out_fn)
-        .expect("Couldn't write bindings!");
+    bindings.write_to_file(out_fn).expect("Couldn't write bindings!");
 
     let re = Regex::new(r"(?s)pub struct _TidyOption \{.+?\}").unwrap();
     let mut file_r = OpenOptions::new().read(true).open(out_fn)?;
@@ -109,12 +118,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     }";
     let replaced = re.replace(&contents, new_val);
     let mut file_w = OpenOptions::new().write(true).truncate(true).open(out_fn)?;
-    file_w.write(replaced.as_bytes())?;
+    file_w.write_all(replaced.as_bytes())?;
     drop(file_w);
 
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=path/to/Cargo.lock");
     println!("cargo:rerun-if-changed=wrapper.h");
-    println!("cargo:rustc-link-lib=tidy");
+
     Ok(())
 }

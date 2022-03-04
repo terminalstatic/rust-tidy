@@ -3,16 +3,24 @@
 pub type __off_t = ::std::os::raw::c_long;
 pub type __off64_t = ::std::os::raw::c_long;
 pub type size_t = ::std::os::raw::c_ulong;
-pub type FILE = _IO_FILE;
 pub type va_list = __builtin_va_list;
-pub type _IO_lock_t = ::std::os::raw::c_void;
+pub type FILE = _IO_FILE;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _IO_marker {
-    pub _next: *mut _IO_marker,
-    pub _sbuf: *mut _IO_FILE,
-    pub _pos: ::std::os::raw::c_int,
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _IO_codecvt {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _IO_wide_data {
+    _unused: [u8; 0],
+}
+pub type _IO_lock_t = ::std::os::raw::c_void;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _IO_FILE {
@@ -38,10 +46,10 @@ pub struct _IO_FILE {
     pub _shortbuf: [::std::os::raw::c_char; 1usize],
     pub _lock: *mut _IO_lock_t,
     pub _offset: __off64_t,
-    pub __pad1: *mut ::std::os::raw::c_void,
-    pub __pad2: *mut ::std::os::raw::c_void,
-    pub __pad3: *mut ::std::os::raw::c_void,
-    pub __pad4: *mut ::std::os::raw::c_void,
+    pub _codecvt: *mut _IO_codecvt,
+    pub _wide_data: *mut _IO_wide_data,
+    pub _freeres_list: *mut _IO_FILE,
+    pub _freeres_buf: *mut ::std::os::raw::c_void,
     pub __pad5: size_t,
     pub _mode: ::std::os::raw::c_int,
     pub _unused2: [::std::os::raw::c_char; 20usize],
@@ -62,635 +70,1360 @@ pub struct _TidyIterator {
 }
 pub type TidyIterator = *const _TidyIterator;
 #[repr(u32)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum TidyConfigCategory {
-    TidyMarkup = 0,
-    TidyDiagnostics = 1,
-    TidyPrettyPrint = 2,
-    TidyEncoding = 3,
-    TidyMiscellaneous = 4,
-}
-#[repr(u32)]
+#[doc = " Option IDs are used used to get and/or set configuration option values and"]
+#[doc = "        retrieve their descriptions."]
+#[doc = ""]
+#[doc = " @remark These enum members all have associated localized strings available"]
+#[doc = "         which describe the purpose of the option. These descriptions are"]
+#[doc = "         available via their enum values only."]
+#[doc = ""]
+#[doc = " @sa     `config.c:option_defs[]` for internal implementation details; that"]
+#[doc = "         array is where you will implement options defined in this enum; and"]
+#[doc = "         it's important to add a string describing the option to"]
+#[doc = "         `language_en.h`, too."]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TidyOptionId {
+    #[doc = "< Unknown option!"]
     TidyUnknownOption = 0,
-    TidyIndentSpaces = 1,
-    TidyWrapLen = 2,
-    TidyTabSize = 3,
-    TidyCharEncoding = 4,
-    TidyInCharEncoding = 5,
-    TidyOutCharEncoding = 6,
-    TidyNewline = 7,
-    TidyDoctypeMode = 8,
-    TidyDoctype = 9,
-    TidyDuplicateAttrs = 10,
-    TidyAltText = 11,
-    TidySlideStyle = 12,
-    TidyErrFile = 13,
-    TidyOutFile = 14,
-    TidyWriteBack = 15,
-    TidyShowMarkup = 16,
-    TidyShowInfo = 17,
-    TidyShowWarnings = 18,
-    TidyQuiet = 19,
-    TidyIndentContent = 20,
-    TidyCoerceEndTags = 21,
-    TidyOmitOptionalTags = 22,
-    TidyHideEndTags = 23,
-    TidyXmlTags = 24,
-    TidyXmlOut = 25,
-    TidyXhtmlOut = 26,
-    TidyHtmlOut = 27,
-    TidyXmlDecl = 28,
-    TidyUpperCaseTags = 29,
-    TidyUpperCaseAttrs = 30,
-    TidyMakeBare = 31,
-    TidyMakeClean = 32,
-    TidyGDocClean = 33,
-    TidyLogicalEmphasis = 34,
-    TidyDropPropAttrs = 35,
-    TidyDropFontTags = 36,
-    TidyDropEmptyElems = 37,
-    TidyDropEmptyParas = 38,
-    TidyFixComments = 39,
-    TidyBreakBeforeBR = 40,
-    TidyBurstSlides = 41,
-    TidyNumEntities = 42,
-    TidyQuoteMarks = 43,
-    TidyQuoteNbsp = 44,
-    TidyQuoteAmpersand = 45,
-    TidyWrapAttVals = 46,
-    TidyWrapScriptlets = 47,
-    TidyWrapSection = 48,
-    TidyWrapAsp = 49,
-    TidyWrapJste = 50,
-    TidyWrapPhp = 51,
-    TidyFixBackslash = 52,
-    TidyIndentAttributes = 53,
-    TidyXmlPIs = 54,
-    TidyXmlSpace = 55,
-    TidyEncloseBodyText = 56,
-    TidyEncloseBlockText = 57,
-    TidyKeepFileTimes = 58,
-    TidyWord2000 = 59,
-    TidyMark = 60,
-    TidyEmacs = 61,
-    TidyEmacsFile = 62,
-    TidyLiteralAttribs = 63,
-    TidyBodyOnly = 64,
-    TidyFixUri = 65,
-    TidyLowerLiterals = 66,
-    TidyHideComments = 67,
-    TidyIndentCdata = 68,
-    TidyForceOutput = 69,
-    TidyShowErrors = 70,
-    TidyAsciiChars = 71,
-    TidyJoinClasses = 72,
-    TidyJoinStyles = 73,
-    TidyEscapeCdata = 74,
-    TidyLanguage = 75,
-    TidyNCR = 76,
-    TidyOutputBOM = 77,
-    TidyReplaceColor = 78,
-    TidyCSSPrefix = 79,
-    TidyInlineTags = 80,
-    TidyBlockTags = 81,
-    TidyEmptyTags = 82,
-    TidyPreTags = 83,
-    TidyAccessibilityCheckLevel = 84,
-    TidyVertSpace = 85,
-    TidyPunctWrap = 86,
-    TidyMergeEmphasis = 87,
-    TidyMergeDivs = 88,
-    TidyDecorateInferredUL = 89,
-    TidyPreserveEntities = 90,
-    TidySortAttributes = 91,
-    TidyMergeSpans = 92,
-    TidyAnchorAsName = 93,
-    TidyPPrintTabs = 94,
-    TidySkipNested = 95,
-    TidyStrictTagsAttr = 96,
-    TidyEscapeScripts = 97,
-    N_TIDY_OPTIONS = 98,
+    #[doc = "< Accessibility check level"]
+    TidyAccessibilityCheckLevel = 1,
+    #[doc = "< Default text for alt attribute"]
+    TidyAltText = 2,
+    #[doc = "< Define anchors as name attributes"]
+    TidyAnchorAsName = 3,
+    #[doc = "< Convert quotes and dashes to nearest ASCII char"]
+    TidyAsciiChars = 4,
+    #[doc = "< Declared block tags"]
+    TidyBlockTags = 5,
+    #[doc = "< Output BODY content only"]
+    TidyBodyOnly = 6,
+    #[doc = "< Output newline before <br> or not?"]
+    TidyBreakBeforeBR = 7,
+    #[doc = "< In/out character encoding"]
+    TidyCharEncoding = 8,
+    #[doc = "< Coerce end tags from start tags where probably intended"]
+    TidyCoerceEndTags = 9,
+    #[doc = "< CSS class naming for clean option"]
+    TidyCSSPrefix = 10,
+    #[doc = "< Internal use ONLY"]
+    TidyCustomTags = 11,
+    #[doc = "< Mark inferred UL elements with no indent CSS"]
+    TidyDecorateInferredUL = 12,
+    #[doc = "< User specified doctype"]
+    TidyDoctype = 13,
+    #[doc = "< Internal use ONLY"]
+    TidyDoctypeMode = 14,
+    #[doc = "< Discard empty elements"]
+    TidyDropEmptyElems = 15,
+    #[doc = "< Discard empty p elements"]
+    TidyDropEmptyParas = 16,
+    #[doc = "< Discard proprietary attributes"]
+    TidyDropPropAttrs = 17,
+    #[doc = "< Keep first or last duplicate attribute"]
+    TidyDuplicateAttrs = 18,
+    #[doc = "< If true, format error output for GNU Emacs"]
+    TidyEmacs = 19,
+    #[doc = "< Internal use ONLY"]
+    TidyEmacsFile = 20,
+    #[doc = "< Declared empty tags"]
+    TidyEmptyTags = 21,
+    #[doc = "< If yes text in blocks is wrapped in P's"]
+    TidyEncloseBlockText = 22,
+    #[doc = "< If yes text at body is wrapped in P's"]
+    TidyEncloseBodyText = 23,
+    #[doc = "< File name to write errors to"]
+    TidyErrFile = 24,
+    #[doc = "< Replace <![CDATA[]]> sections with escaped text"]
+    TidyEscapeCdata = 25,
+    #[doc = "< Escape items that look like closing tags in script tags"]
+    TidyEscapeScripts = 26,
+    #[doc = "< Fix URLs by replacing \\ with /"]
+    TidyFixBackslash = 27,
+    #[doc = "< Fix comments with adjacent hyphens"]
+    TidyFixComments = 28,
+    #[doc = "< Applies URI encoding if necessary"]
+    TidyFixUri = 29,
+    #[doc = "< Output document even if errors were found"]
+    TidyForceOutput = 30,
+    #[doc = "< Clean up HTML exported from Google Docs"]
+    TidyGDocClean = 31,
+    #[doc = "< Hides all (real) comments in output"]
+    TidyHideComments = 32,
+    #[doc = "< Output plain HTML, even for XHTML input."]
+    TidyHtmlOut = 33,
+    #[doc = "< Input character encoding (if different)"]
+    TidyInCharEncoding = 34,
+    #[doc = "< Newline+indent before each attribute"]
+    TidyIndentAttributes = 35,
+    #[doc = "< Indent <!CDATA[ ... ]]> section"]
+    TidyIndentCdata = 36,
+    #[doc = "< Indent content of appropriate tags"]
+    TidyIndentContent = 37,
+    #[doc = "< Indentation n spaces/tabs"]
+    TidyIndentSpaces = 38,
+    #[doc = "< Declared inline tags"]
+    TidyInlineTags = 39,
+    #[doc = "< Join multiple class attributes"]
+    TidyJoinClasses = 40,
+    #[doc = "< Join multiple style attributes"]
+    TidyJoinStyles = 41,
+    #[doc = "< If yes last modied time is preserved"]
+    TidyKeepFileTimes = 42,
+    #[doc = "< If yes keep input source tabs"]
+    TidyKeepTabs = 43,
+    #[doc = "< If true attributes may use newlines"]
+    TidyLiteralAttribs = 44,
+    #[doc = "< Replace i by em and b by strong"]
+    TidyLogicalEmphasis = 45,
+    #[doc = "< Folds known attribute values to lower case"]
+    TidyLowerLiterals = 46,
+    #[doc = "< Replace smart quotes, em dashes, etc with ASCII"]
+    TidyMakeBare = 47,
+    #[doc = "< Replace presentational clutter by style rules"]
+    TidyMakeClean = 48,
+    #[doc = "< Add meta element indicating tidied doc"]
+    TidyMark = 49,
+    #[doc = "< Merge multiple DIVs"]
+    TidyMergeDivs = 50,
+    #[doc = "< Merge nested B and I elements"]
+    TidyMergeEmphasis = 51,
+    #[doc = "< Merge multiple SPANs"]
+    TidyMergeSpans = 52,
+    #[doc = "< Adds/checks/fixes meta charset in the head, based on document type"]
+    TidyMetaCharset = 53,
+    #[doc = "< Filter these messages from output."]
+    TidyMuteReports = 54,
+    #[doc = "< Show message ID's in the error table"]
+    TidyMuteShow = 55,
+    #[doc = "< Allow numeric character references"]
+    TidyNCR = 56,
+    #[doc = "< Output line ending (default to platform)"]
+    TidyNewline = 57,
+    #[doc = "< Use numeric entities"]
+    TidyNumEntities = 58,
+    #[doc = "< Suppress optional start tags and end tags"]
+    TidyOmitOptionalTags = 59,
+    #[doc = "< Output character encoding (if different)"]
+    TidyOutCharEncoding = 60,
+    #[doc = "< File name to write markup to"]
+    TidyOutFile = 61,
+    #[doc = "< Output a Byte Order Mark (BOM) for UTF-16 encodings"]
+    TidyOutputBOM = 62,
+    #[doc = "< Indent using tabs istead of spaces"]
+    TidyPPrintTabs = 63,
+    #[doc = "< Preserve entities"]
+    TidyPreserveEntities = 64,
+    #[doc = "< Declared pre tags"]
+    TidyPreTags = 65,
+    #[doc = "< Attributes to place first in an element"]
+    TidyPriorityAttributes = 66,
+    #[doc = "< consider punctuation and breaking spaces for wrapping"]
+    TidyPunctWrap = 67,
+    #[doc = "< No 'Parsing X', guessed DTD or summary"]
+    TidyQuiet = 68,
+    #[doc = "< Output naked ampersand as &amp;"]
+    TidyQuoteAmpersand = 69,
+    #[doc = "< Output \" marks as &quot;"]
+    TidyQuoteMarks = 70,
+    #[doc = "< Output non-breaking space as entity"]
+    TidyQuoteNbsp = 71,
+    #[doc = "< Replace hex color attribute values with names"]
+    TidyReplaceColor = 72,
+    #[doc = "< Number of errors to put out"]
+    TidyShowErrors = 73,
+    #[doc = "< If true, the input filename is displayed with the error messages"]
+    TidyShowFilename = 74,
+    #[doc = "< If true, info-level messages are shown"]
+    TidyShowInfo = 75,
+    #[doc = "< If false, normal output is suppressed"]
+    TidyShowMarkup = 76,
+    #[doc = "< show when meta http-equiv content charset was changed - compatibility"]
+    TidyShowMetaChange = 77,
+    #[doc = "< However errors are always shown"]
+    TidyShowWarnings = 78,
+    #[doc = "< Skip nested tags in script and style CDATA"]
+    TidySkipNested = 79,
+    #[doc = "< Sort attributes"]
+    TidySortAttributes = 80,
+    #[doc = "< Ensure tags and attributes match output HTML version"]
+    TidyStrictTagsAttr = 81,
+    #[doc = "< Move sytle to head"]
+    TidyStyleTags = 82,
+    #[doc = "< Expand tabs to n spaces"]
+    TidyTabSize = 83,
+    #[doc = "< Output attributes in upper not lower case"]
+    TidyUpperCaseAttrs = 84,
+    #[doc = "< Output tags in upper not lower case"]
+    TidyUpperCaseTags = 85,
+    #[doc = "< Enable Tidy to use autonomous custom tags"]
+    TidyUseCustomTags = 86,
+    #[doc = "< degree to which markup is spread out vertically"]
+    TidyVertSpace = 87,
+    #[doc = "< Warns on proprietary attributes"]
+    TidyWarnPropAttrs = 88,
+    #[doc = "< Draconian cleaning for Word2000"]
+    TidyWord2000 = 89,
+    #[doc = "< Wrap within ASP pseudo elements"]
+    TidyWrapAsp = 90,
+    #[doc = "< Wrap within attribute values"]
+    TidyWrapAttVals = 91,
+    #[doc = "< Wrap within JSTE pseudo elements"]
+    TidyWrapJste = 92,
+    #[doc = "< Wrap margin"]
+    TidyWrapLen = 93,
+    #[doc = "< Wrap consecutive PHP pseudo elements"]
+    TidyWrapPhp = 94,
+    #[doc = "< Wrap within JavaScript string literals"]
+    TidyWrapScriptlets = 95,
+    #[doc = "< Wrap within <![ ... ]> section tags"]
+    TidyWrapSection = 96,
+    #[doc = "< If true then output tidied markup"]
+    TidyWriteBack = 97,
+    #[doc = "< Output extensible HTML"]
+    TidyXhtmlOut = 98,
+    #[doc = "< Add <?xml?> for XML docs"]
+    TidyXmlDecl = 99,
+    #[doc = "< Create output as XML"]
+    TidyXmlOut = 100,
+    #[doc = "< If set to yes PIs must end with ?>"]
+    TidyXmlPIs = 101,
+    #[doc = "< If set to yes adds xml:space attr as needed"]
+    TidyXmlSpace = 102,
+    #[doc = "< Treat input as XML"]
+    TidyXmlTags = 103,
+    #[doc = "< Must be last"]
+    N_TIDY_OPTIONS = 104,
 }
 #[repr(u32)]
+#[doc = " Categories of Tidy configuration options, which are used mostly by user"]
+#[doc = " interfaces to sort Tidy options into related groups."]
+#[doc = ""]
+#[doc = " @remark These enum members all have associated localized strings available"]
+#[doc = "         suitable for use as a category label, and are available with either"]
+#[doc = "         the enum value, or a string version of the name."]
+#[doc = ""]
+#[doc = " @sa     `config.c:option_defs[]` for internal implementation details."]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum TidyConfigCategory {
+    #[doc = "< Unknown Category!"]
+    TidyUnknownCategory = 300,
+    TidyDiagnostics = 301,
+    TidyDisplay = 302,
+    TidyDocumentIO = 303,
+    TidyEncoding = 304,
+    TidyFileIO = 305,
+    TidyMarkupCleanup = 306,
+    TidyMarkupEntities = 307,
+    TidyMarkupRepair = 308,
+    TidyMarkupTeach = 309,
+    TidyMarkupXForm = 310,
+    TidyPrettyPrint = 311,
+    TidyInternalCategory = 312,
+}
+#[repr(u32)]
+#[doc = " A Tidy configuration option can have one of these data types."]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TidyOptionType {
+    #[doc = "< String"]
     TidyString = 0,
+    #[doc = "< Integer or enumeration"]
     TidyInteger = 1,
+    #[doc = "< Boolean"]
     TidyBoolean = 2,
 }
 #[repr(u32)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum TidyReportLevel {
-    TidyInfo = 0,
-    TidyWarning = 1,
-    TidyConfig = 2,
-    TidyAccess = 3,
-    TidyError = 4,
-    TidyBadDocument = 5,
-    TidyFatal = 6,
-}
-#[repr(u32)]
+#[doc = " Node types"]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TidyNodeType {
+    #[doc = "< Root"]
     TidyNode_Root = 0,
+    #[doc = "< DOCTYPE"]
     TidyNode_DocType = 1,
+    #[doc = "< Comment"]
     TidyNode_Comment = 2,
+    #[doc = "< Processing Instruction"]
     TidyNode_ProcIns = 3,
+    #[doc = "< Text"]
     TidyNode_Text = 4,
+    #[doc = "< Start Tag"]
     TidyNode_Start = 5,
+    #[doc = "< End Tag"]
     TidyNode_End = 6,
+    #[doc = "< Start/End (empty) Tag"]
     TidyNode_StartEnd = 7,
+    #[doc = "< Unparsed Text"]
     TidyNode_CDATA = 8,
+    #[doc = "< XML Section"]
     TidyNode_Section = 9,
+    #[doc = "< ASP Source"]
     TidyNode_Asp = 10,
+    #[doc = "< JSTE Source"]
     TidyNode_Jste = 11,
+    #[doc = "< PHP Source"]
     TidyNode_Php = 12,
+    #[doc = "< XML Declaration"]
     TidyNode_XmlDecl = 13,
 }
 #[repr(u32)]
+#[doc = " Known HTML element types"]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TidyTagId {
+    #[doc = "< Unknown tag! Must be first"]
     TidyTag_UNKNOWN = 0,
+    #[doc = "< A"]
     TidyTag_A = 1,
+    #[doc = "< ABBR"]
     TidyTag_ABBR = 2,
+    #[doc = "< ACRONYM"]
     TidyTag_ACRONYM = 3,
+    #[doc = "< ADDRESS"]
     TidyTag_ADDRESS = 4,
+    #[doc = "< ALIGN"]
     TidyTag_ALIGN = 5,
+    #[doc = "< APPLET"]
     TidyTag_APPLET = 6,
+    #[doc = "< AREA"]
     TidyTag_AREA = 7,
+    #[doc = "< B"]
     TidyTag_B = 8,
+    #[doc = "< BASE"]
     TidyTag_BASE = 9,
+    #[doc = "< BASEFONT"]
     TidyTag_BASEFONT = 10,
+    #[doc = "< BDO"]
     TidyTag_BDO = 11,
+    #[doc = "< BGSOUND"]
     TidyTag_BGSOUND = 12,
+    #[doc = "< BIG"]
     TidyTag_BIG = 13,
+    #[doc = "< BLINK"]
     TidyTag_BLINK = 14,
+    #[doc = "< BLOCKQUOTE"]
     TidyTag_BLOCKQUOTE = 15,
+    #[doc = "< BODY"]
     TidyTag_BODY = 16,
+    #[doc = "< BR"]
     TidyTag_BR = 17,
+    #[doc = "< BUTTON"]
     TidyTag_BUTTON = 18,
+    #[doc = "< CAPTION"]
     TidyTag_CAPTION = 19,
+    #[doc = "< CENTER"]
     TidyTag_CENTER = 20,
+    #[doc = "< CITE"]
     TidyTag_CITE = 21,
+    #[doc = "< CODE"]
     TidyTag_CODE = 22,
+    #[doc = "< COL"]
     TidyTag_COL = 23,
+    #[doc = "< COLGROUP"]
     TidyTag_COLGROUP = 24,
+    #[doc = "< COMMENT"]
     TidyTag_COMMENT = 25,
+    #[doc = "< DD"]
     TidyTag_DD = 26,
+    #[doc = "< DEL"]
     TidyTag_DEL = 27,
+    #[doc = "< DFN"]
     TidyTag_DFN = 28,
+    #[doc = "< DIR"]
     TidyTag_DIR = 29,
+    #[doc = "< DIF"]
     TidyTag_DIV = 30,
+    #[doc = "< DL"]
     TidyTag_DL = 31,
+    #[doc = "< DT"]
     TidyTag_DT = 32,
+    #[doc = "< EM"]
     TidyTag_EM = 33,
+    #[doc = "< EMBED"]
     TidyTag_EMBED = 34,
+    #[doc = "< FIELDSET"]
     TidyTag_FIELDSET = 35,
+    #[doc = "< FONT"]
     TidyTag_FONT = 36,
+    #[doc = "< FORM"]
     TidyTag_FORM = 37,
+    #[doc = "< FRAME"]
     TidyTag_FRAME = 38,
+    #[doc = "< FRAMESET"]
     TidyTag_FRAMESET = 39,
+    #[doc = "< H1"]
     TidyTag_H1 = 40,
+    #[doc = "< H2"]
     TidyTag_H2 = 41,
+    #[doc = "< H3"]
     TidyTag_H3 = 42,
+    #[doc = "< H4"]
     TidyTag_H4 = 43,
+    #[doc = "< H5"]
     TidyTag_H5 = 44,
+    #[doc = "< H6"]
     TidyTag_H6 = 45,
+    #[doc = "< HEAD"]
     TidyTag_HEAD = 46,
+    #[doc = "< HR"]
     TidyTag_HR = 47,
+    #[doc = "< HTML"]
     TidyTag_HTML = 48,
+    #[doc = "< I"]
     TidyTag_I = 49,
+    #[doc = "< IFRAME"]
     TidyTag_IFRAME = 50,
+    #[doc = "< ILAYER"]
     TidyTag_ILAYER = 51,
+    #[doc = "< IMG"]
     TidyTag_IMG = 52,
+    #[doc = "< INPUT"]
     TidyTag_INPUT = 53,
+    #[doc = "< INS"]
     TidyTag_INS = 54,
+    #[doc = "< ISINDEX"]
     TidyTag_ISINDEX = 55,
+    #[doc = "< KBD"]
     TidyTag_KBD = 56,
+    #[doc = "< KEYGEN"]
     TidyTag_KEYGEN = 57,
+    #[doc = "< LABEL"]
     TidyTag_LABEL = 58,
+    #[doc = "< LAYER"]
     TidyTag_LAYER = 59,
+    #[doc = "< LEGEND"]
     TidyTag_LEGEND = 60,
+    #[doc = "< LI"]
     TidyTag_LI = 61,
+    #[doc = "< LINK"]
     TidyTag_LINK = 62,
+    #[doc = "< LISTING"]
     TidyTag_LISTING = 63,
+    #[doc = "< MAP"]
     TidyTag_MAP = 64,
+    #[doc = "< MATH  (HTML5) [i_a]2 MathML embedded in [X]HTML"]
     TidyTag_MATHML = 65,
+    #[doc = "< MARQUEE"]
     TidyTag_MARQUEE = 66,
+    #[doc = "< MENU"]
     TidyTag_MENU = 67,
+    #[doc = "< META"]
     TidyTag_META = 68,
+    #[doc = "< MULTICOL"]
     TidyTag_MULTICOL = 69,
+    #[doc = "< NOBR"]
     TidyTag_NOBR = 70,
+    #[doc = "< NOEMBED"]
     TidyTag_NOEMBED = 71,
+    #[doc = "< NOFRAMES"]
     TidyTag_NOFRAMES = 72,
+    #[doc = "< NOLAYER"]
     TidyTag_NOLAYER = 73,
+    #[doc = "< NOSAVE"]
     TidyTag_NOSAVE = 74,
+    #[doc = "< NOSCRIPT"]
     TidyTag_NOSCRIPT = 75,
+    #[doc = "< OBJECT"]
     TidyTag_OBJECT = 76,
+    #[doc = "< OL"]
     TidyTag_OL = 77,
+    #[doc = "< OPTGROUP"]
     TidyTag_OPTGROUP = 78,
+    #[doc = "< OPTION"]
     TidyTag_OPTION = 79,
+    #[doc = "< P"]
     TidyTag_P = 80,
+    #[doc = "< PARAM"]
     TidyTag_PARAM = 81,
+    #[doc = "< PICTURE (HTML5)"]
     TidyTag_PICTURE = 82,
+    #[doc = "< PLAINTEXT"]
     TidyTag_PLAINTEXT = 83,
+    #[doc = "< PRE"]
     TidyTag_PRE = 84,
+    #[doc = "< Q"]
     TidyTag_Q = 85,
+    #[doc = "< RB"]
     TidyTag_RB = 86,
+    #[doc = "< RBC"]
     TidyTag_RBC = 87,
+    #[doc = "< RP"]
     TidyTag_RP = 88,
+    #[doc = "< RT"]
     TidyTag_RT = 89,
+    #[doc = "< RTC"]
     TidyTag_RTC = 90,
+    #[doc = "< RUBY"]
     TidyTag_RUBY = 91,
+    #[doc = "< S"]
     TidyTag_S = 92,
+    #[doc = "< SAMP"]
     TidyTag_SAMP = 93,
+    #[doc = "< SCRIPT"]
     TidyTag_SCRIPT = 94,
+    #[doc = "< SELECT"]
     TidyTag_SELECT = 95,
+    #[doc = "< SERVER"]
     TidyTag_SERVER = 96,
+    #[doc = "< SERVLET"]
     TidyTag_SERVLET = 97,
+    #[doc = "< SMALL"]
     TidyTag_SMALL = 98,
+    #[doc = "< SPACER"]
     TidyTag_SPACER = 99,
+    #[doc = "< SPAN"]
     TidyTag_SPAN = 100,
+    #[doc = "< STRIKE"]
     TidyTag_STRIKE = 101,
+    #[doc = "< STRONG"]
     TidyTag_STRONG = 102,
+    #[doc = "< STYLE"]
     TidyTag_STYLE = 103,
+    #[doc = "< SUB"]
     TidyTag_SUB = 104,
+    #[doc = "< SUP"]
     TidyTag_SUP = 105,
+    #[doc = "< SVG  (HTML5)"]
     TidyTag_SVG = 106,
+    #[doc = "< TABLE"]
     TidyTag_TABLE = 107,
+    #[doc = "< TBODY"]
     TidyTag_TBODY = 108,
+    #[doc = "< TD"]
     TidyTag_TD = 109,
+    #[doc = "< TEXTAREA"]
     TidyTag_TEXTAREA = 110,
+    #[doc = "< TFOOT"]
     TidyTag_TFOOT = 111,
+    #[doc = "< TH"]
     TidyTag_TH = 112,
+    #[doc = "< THEAD"]
     TidyTag_THEAD = 113,
+    #[doc = "< TITLE"]
     TidyTag_TITLE = 114,
+    #[doc = "< TR"]
     TidyTag_TR = 115,
+    #[doc = "< TT"]
     TidyTag_TT = 116,
+    #[doc = "< U"]
     TidyTag_U = 117,
+    #[doc = "< UL"]
     TidyTag_UL = 118,
+    #[doc = "< VAR"]
     TidyTag_VAR = 119,
+    #[doc = "< WBR"]
     TidyTag_WBR = 120,
+    #[doc = "< XMP"]
     TidyTag_XMP = 121,
+    #[doc = "< NEXTID"]
     TidyTag_NEXTID = 122,
+    #[doc = "< ARTICLE"]
     TidyTag_ARTICLE = 123,
+    #[doc = "< ASIDE"]
     TidyTag_ASIDE = 124,
+    #[doc = "< AUDIO"]
     TidyTag_AUDIO = 125,
+    #[doc = "< BDI"]
     TidyTag_BDI = 126,
+    #[doc = "< CANVAS"]
     TidyTag_CANVAS = 127,
+    #[doc = "< COMMAND"]
     TidyTag_COMMAND = 128,
-    TidyTag_DATALIST = 129,
-    TidyTag_DETAILS = 130,
-    TidyTag_DIALOG = 131,
-    TidyTag_FIGCAPTION = 132,
-    TidyTag_FIGURE = 133,
-    TidyTag_FOOTER = 134,
-    TidyTag_HEADER = 135,
-    TidyTag_HGROUP = 136,
-    TidyTag_MAIN = 137,
-    TidyTag_MARK = 138,
-    TidyTag_MENUITEM = 139,
-    TidyTag_METER = 140,
-    TidyTag_NAV = 141,
-    TidyTag_OUTPUT = 142,
-    TidyTag_PROGRESS = 143,
-    TidyTag_SECTION = 144,
-    TidyTag_SOURCE = 145,
-    TidyTag_SUMMARY = 146,
-    TidyTag_TEMPLATE = 147,
-    TidyTag_TIME = 148,
-    TidyTag_TRACK = 149,
-    TidyTag_VIDEO = 150,
-    N_TIDY_TAGS = 151,
+    #[doc = "< DATA"]
+    TidyTag_DATA = 129,
+    #[doc = "< DATALIST"]
+    TidyTag_DATALIST = 130,
+    #[doc = "< DETAILS"]
+    TidyTag_DETAILS = 131,
+    #[doc = "< DIALOG"]
+    TidyTag_DIALOG = 132,
+    #[doc = "< FIGCAPTION"]
+    TidyTag_FIGCAPTION = 133,
+    #[doc = "< FIGURE"]
+    TidyTag_FIGURE = 134,
+    #[doc = "< FOOTER"]
+    TidyTag_FOOTER = 135,
+    #[doc = "< HEADER"]
+    TidyTag_HEADER = 136,
+    #[doc = "< HGROUP"]
+    TidyTag_HGROUP = 137,
+    #[doc = "< MAIN"]
+    TidyTag_MAIN = 138,
+    #[doc = "< MARK"]
+    TidyTag_MARK = 139,
+    #[doc = "< MENUITEM"]
+    TidyTag_MENUITEM = 140,
+    #[doc = "< METER"]
+    TidyTag_METER = 141,
+    #[doc = "< NAV"]
+    TidyTag_NAV = 142,
+    #[doc = "< OUTPUT"]
+    TidyTag_OUTPUT = 143,
+    #[doc = "< PROGRESS"]
+    TidyTag_PROGRESS = 144,
+    #[doc = "< SECTION"]
+    TidyTag_SECTION = 145,
+    #[doc = "< SOURCE"]
+    TidyTag_SOURCE = 146,
+    #[doc = "< SUMMARY"]
+    TidyTag_SUMMARY = 147,
+    #[doc = "< TEMPLATE"]
+    TidyTag_TEMPLATE = 148,
+    #[doc = "< TIME"]
+    TidyTag_TIME = 149,
+    #[doc = "< TRACK"]
+    TidyTag_TRACK = 150,
+    #[doc = "< VIDEO"]
+    TidyTag_VIDEO = 151,
+    #[doc = "< SLOT"]
+    TidyTag_SLOT = 152,
+    #[doc = "< Must be last"]
+    N_TIDY_TAGS = 153,
 }
 #[repr(u32)]
+#[doc = " Known HTML attributes"]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TidyAttrId {
+    #[doc = "< UNKNOWN="]
     TidyAttr_UNKNOWN = 0,
+    #[doc = "< ABBR="]
     TidyAttr_ABBR = 1,
+    #[doc = "< ACCEPT="]
     TidyAttr_ACCEPT = 2,
+    #[doc = "< ACCEPT_CHARSET="]
     TidyAttr_ACCEPT_CHARSET = 3,
+    #[doc = "< ACCESSKEY="]
     TidyAttr_ACCESSKEY = 4,
+    #[doc = "< ACTION="]
     TidyAttr_ACTION = 5,
+    #[doc = "< ADD_DATE="]
     TidyAttr_ADD_DATE = 6,
+    #[doc = "< ALIGN="]
     TidyAttr_ALIGN = 7,
+    #[doc = "< ALINK="]
     TidyAttr_ALINK = 8,
+    #[doc = "< ALLOWFULLSCREEN="]
     TidyAttr_ALLOWFULLSCREEN = 9,
+    #[doc = "< ALT="]
     TidyAttr_ALT = 10,
+    #[doc = "< ARCHIVE="]
     TidyAttr_ARCHIVE = 11,
+    #[doc = "< AXIS="]
     TidyAttr_AXIS = 12,
+    #[doc = "< BACKGROUND="]
     TidyAttr_BACKGROUND = 13,
+    #[doc = "< BGCOLOR="]
     TidyAttr_BGCOLOR = 14,
+    #[doc = "< BGPROPERTIES="]
     TidyAttr_BGPROPERTIES = 15,
+    #[doc = "< BORDER="]
     TidyAttr_BORDER = 16,
+    #[doc = "< BORDERCOLOR="]
     TidyAttr_BORDERCOLOR = 17,
+    #[doc = "< BOTTOMMARGIN="]
     TidyAttr_BOTTOMMARGIN = 18,
+    #[doc = "< CELLPADDING="]
     TidyAttr_CELLPADDING = 19,
+    #[doc = "< CELLSPACING="]
     TidyAttr_CELLSPACING = 20,
+    #[doc = "< CHAR="]
     TidyAttr_CHAR = 21,
+    #[doc = "< CHAROFF="]
     TidyAttr_CHAROFF = 22,
+    #[doc = "< CHARSET="]
     TidyAttr_CHARSET = 23,
+    #[doc = "< CHECKED="]
     TidyAttr_CHECKED = 24,
+    #[doc = "< CITE="]
     TidyAttr_CITE = 25,
+    #[doc = "< CLASS="]
     TidyAttr_CLASS = 26,
+    #[doc = "< CLASSID="]
     TidyAttr_CLASSID = 27,
+    #[doc = "< CLEAR="]
     TidyAttr_CLEAR = 28,
+    #[doc = "< CODE="]
     TidyAttr_CODE = 29,
+    #[doc = "< CODEBASE="]
     TidyAttr_CODEBASE = 30,
+    #[doc = "< CODETYPE="]
     TidyAttr_CODETYPE = 31,
+    #[doc = "< COLOR="]
     TidyAttr_COLOR = 32,
+    #[doc = "< COLS="]
     TidyAttr_COLS = 33,
+    #[doc = "< COLSPAN="]
     TidyAttr_COLSPAN = 34,
+    #[doc = "< COMPACT="]
     TidyAttr_COMPACT = 35,
+    #[doc = "< CONTENT="]
     TidyAttr_CONTENT = 36,
+    #[doc = "< COORDS="]
     TidyAttr_COORDS = 37,
+    #[doc = "< DATA="]
     TidyAttr_DATA = 38,
+    #[doc = "< DATAFLD="]
     TidyAttr_DATAFLD = 39,
+    #[doc = "< DATAFORMATAS="]
     TidyAttr_DATAFORMATAS = 40,
+    #[doc = "< DATAPAGESIZE="]
     TidyAttr_DATAPAGESIZE = 41,
+    #[doc = "< DATASRC="]
     TidyAttr_DATASRC = 42,
+    #[doc = "< DATETIME="]
     TidyAttr_DATETIME = 43,
+    #[doc = "< DECLARE="]
     TidyAttr_DECLARE = 44,
+    #[doc = "< DEFER="]
     TidyAttr_DEFER = 45,
+    #[doc = "< DIR="]
     TidyAttr_DIR = 46,
+    #[doc = "< DISABLED="]
     TidyAttr_DISABLED = 47,
-    TidyAttr_ENCODING = 48,
-    TidyAttr_ENCTYPE = 49,
-    TidyAttr_FACE = 50,
-    TidyAttr_FOR = 51,
-    TidyAttr_FRAME = 52,
-    TidyAttr_FRAMEBORDER = 53,
-    TidyAttr_FRAMESPACING = 54,
-    TidyAttr_GRIDX = 55,
-    TidyAttr_GRIDY = 56,
-    TidyAttr_HEADERS = 57,
-    TidyAttr_HEIGHT = 58,
-    TidyAttr_HREF = 59,
-    TidyAttr_HREFLANG = 60,
-    TidyAttr_HSPACE = 61,
-    TidyAttr_HTTP_EQUIV = 62,
-    TidyAttr_ID = 63,
-    TidyAttr_ISMAP = 64,
-    TidyAttr_ITEMID = 65,
-    TidyAttr_ITEMPROP = 66,
-    TidyAttr_ITEMREF = 67,
-    TidyAttr_ITEMSCOPE = 68,
-    TidyAttr_ITEMTYPE = 69,
-    TidyAttr_LABEL = 70,
-    TidyAttr_LANG = 71,
-    TidyAttr_LANGUAGE = 72,
-    TidyAttr_LAST_MODIFIED = 73,
-    TidyAttr_LAST_VISIT = 74,
-    TidyAttr_LEFTMARGIN = 75,
-    TidyAttr_LINK = 76,
-    TidyAttr_LONGDESC = 77,
-    TidyAttr_LOWSRC = 78,
-    TidyAttr_MARGINHEIGHT = 79,
-    TidyAttr_MARGINWIDTH = 80,
-    TidyAttr_MAXLENGTH = 81,
-    TidyAttr_MEDIA = 82,
-    TidyAttr_METHOD = 83,
-    TidyAttr_MULTIPLE = 84,
-    TidyAttr_NAME = 85,
-    TidyAttr_NOHREF = 86,
-    TidyAttr_NORESIZE = 87,
-    TidyAttr_NOSHADE = 88,
-    TidyAttr_NOWRAP = 89,
-    TidyAttr_OBJECT = 90,
-    TidyAttr_OnAFTERUPDATE = 91,
-    TidyAttr_OnBEFOREUNLOAD = 92,
-    TidyAttr_OnBEFOREUPDATE = 93,
-    TidyAttr_OnBLUR = 94,
-    TidyAttr_OnCHANGE = 95,
-    TidyAttr_OnCLICK = 96,
-    TidyAttr_OnDATAAVAILABLE = 97,
-    TidyAttr_OnDATASETCHANGED = 98,
-    TidyAttr_OnDATASETCOMPLETE = 99,
-    TidyAttr_OnDBLCLICK = 100,
-    TidyAttr_OnERRORUPDATE = 101,
-    TidyAttr_OnFOCUS = 102,
-    TidyAttr_OnKEYDOWN = 103,
-    TidyAttr_OnKEYPRESS = 104,
-    TidyAttr_OnKEYUP = 105,
-    TidyAttr_OnLOAD = 106,
-    TidyAttr_OnMOUSEDOWN = 107,
-    TidyAttr_OnMOUSEMOVE = 108,
-    TidyAttr_OnMOUSEOUT = 109,
-    TidyAttr_OnMOUSEOVER = 110,
-    TidyAttr_OnMOUSEUP = 111,
-    TidyAttr_OnRESET = 112,
-    TidyAttr_OnROWENTER = 113,
-    TidyAttr_OnROWEXIT = 114,
-    TidyAttr_OnSELECT = 115,
-    TidyAttr_OnSUBMIT = 116,
-    TidyAttr_OnUNLOAD = 117,
-    TidyAttr_PROFILE = 118,
-    TidyAttr_PROMPT = 119,
-    TidyAttr_RBSPAN = 120,
-    TidyAttr_READONLY = 121,
-    TidyAttr_REL = 122,
-    TidyAttr_REV = 123,
-    TidyAttr_RIGHTMARGIN = 124,
-    TidyAttr_ROLE = 125,
-    TidyAttr_ROWS = 126,
-    TidyAttr_ROWSPAN = 127,
-    TidyAttr_RULES = 128,
-    TidyAttr_SCHEME = 129,
-    TidyAttr_SCOPE = 130,
-    TidyAttr_SCROLLING = 131,
-    TidyAttr_SELECTED = 132,
-    TidyAttr_SHAPE = 133,
-    TidyAttr_SHOWGRID = 134,
-    TidyAttr_SHOWGRIDX = 135,
-    TidyAttr_SHOWGRIDY = 136,
-    TidyAttr_SIZE = 137,
-    TidyAttr_SPAN = 138,
-    TidyAttr_SRC = 139,
-    TidyAttr_SRCSET = 140,
-    TidyAttr_STANDBY = 141,
-    TidyAttr_START = 142,
-    TidyAttr_STYLE = 143,
-    TidyAttr_SUMMARY = 144,
-    TidyAttr_TABINDEX = 145,
-    TidyAttr_TARGET = 146,
-    TidyAttr_TEXT = 147,
-    TidyAttr_TITLE = 148,
-    TidyAttr_TOPMARGIN = 149,
-    TidyAttr_TRANSLATE = 150,
-    TidyAttr_TYPE = 151,
-    TidyAttr_USEMAP = 152,
-    TidyAttr_VALIGN = 153,
-    TidyAttr_VALUE = 154,
-    TidyAttr_VALUETYPE = 155,
-    TidyAttr_VERSION = 156,
-    TidyAttr_VLINK = 157,
-    TidyAttr_VSPACE = 158,
-    TidyAttr_WIDTH = 159,
-    TidyAttr_WRAP = 160,
-    TidyAttr_XML_LANG = 161,
-    TidyAttr_XML_SPACE = 162,
-    TidyAttr_XMLNS = 163,
-    TidyAttr_EVENT = 164,
-    TidyAttr_METHODS = 165,
-    TidyAttr_N = 166,
-    TidyAttr_SDAFORM = 167,
-    TidyAttr_SDAPREF = 168,
-    TidyAttr_SDASUFF = 169,
-    TidyAttr_URN = 170,
-    TidyAttr_ASYNC = 171,
-    TidyAttr_AUTOCOMPLETE = 172,
-    TidyAttr_AUTOFOCUS = 173,
-    TidyAttr_AUTOPLAY = 174,
-    TidyAttr_CHALLENGE = 175,
-    TidyAttr_CONTENTEDITABLE = 176,
-    TidyAttr_CONTEXTMENU = 177,
-    TidyAttr_CONTROLS = 178,
-    TidyAttr_DEFAULT = 179,
-    TidyAttr_DIRNAME = 180,
-    TidyAttr_DRAGGABLE = 181,
-    TidyAttr_DROPZONE = 182,
-    TidyAttr_FORM = 183,
-    TidyAttr_FORMACTION = 184,
-    TidyAttr_FORMENCTYPE = 185,
-    TidyAttr_FORMMETHOD = 186,
-    TidyAttr_FORMNOVALIDATE = 187,
-    TidyAttr_FORMTARGET = 188,
-    TidyAttr_HIDDEN = 189,
-    TidyAttr_HIGH = 190,
-    TidyAttr_ICON = 191,
-    TidyAttr_KEYTYPE = 192,
-    TidyAttr_KIND = 193,
-    TidyAttr_LIST = 194,
-    TidyAttr_LOOP = 195,
-    TidyAttr_LOW = 196,
-    TidyAttr_MANIFEST = 197,
-    TidyAttr_MAX = 198,
-    TidyAttr_MEDIAGROUP = 199,
-    TidyAttr_MIN = 200,
-    TidyAttr_NOVALIDATE = 201,
-    TidyAttr_OPEN = 202,
-    TidyAttr_OPTIMUM = 203,
-    TidyAttr_OnABORT = 204,
-    TidyAttr_OnAFTERPRINT = 205,
-    TidyAttr_OnBEFOREPRINT = 206,
-    TidyAttr_OnCANPLAY = 207,
-    TidyAttr_OnCANPLAYTHROUGH = 208,
-    TidyAttr_OnCONTEXTMENU = 209,
-    TidyAttr_OnCUECHANGE = 210,
-    TidyAttr_OnDRAG = 211,
-    TidyAttr_OnDRAGEND = 212,
-    TidyAttr_OnDRAGENTER = 213,
-    TidyAttr_OnDRAGLEAVE = 214,
-    TidyAttr_OnDRAGOVER = 215,
-    TidyAttr_OnDRAGSTART = 216,
-    TidyAttr_OnDROP = 217,
-    TidyAttr_OnDURATIONCHANGE = 218,
-    TidyAttr_OnEMPTIED = 219,
-    TidyAttr_OnENDED = 220,
-    TidyAttr_OnERROR = 221,
-    TidyAttr_OnHASHCHANGE = 222,
-    TidyAttr_OnINPUT = 223,
-    TidyAttr_OnINVALID = 224,
-    TidyAttr_OnLOADEDDATA = 225,
-    TidyAttr_OnLOADEDMETADATA = 226,
-    TidyAttr_OnLOADSTART = 227,
-    TidyAttr_OnMESSAGE = 228,
-    TidyAttr_OnMOUSEWHEEL = 229,
-    TidyAttr_OnOFFLINE = 230,
-    TidyAttr_OnONLINE = 231,
-    TidyAttr_OnPAGEHIDE = 232,
-    TidyAttr_OnPAGESHOW = 233,
-    TidyAttr_OnPAUSE = 234,
-    TidyAttr_OnPLAY = 235,
-    TidyAttr_OnPLAYING = 236,
-    TidyAttr_OnPOPSTATE = 237,
-    TidyAttr_OnPROGRESS = 238,
-    TidyAttr_OnRATECHANGE = 239,
-    TidyAttr_OnREADYSTATECHANGE = 240,
-    TidyAttr_OnREDO = 241,
-    TidyAttr_OnRESIZE = 242,
-    TidyAttr_OnSCROLL = 243,
-    TidyAttr_OnSEEKED = 244,
-    TidyAttr_OnSEEKING = 245,
-    TidyAttr_OnSHOW = 246,
-    TidyAttr_OnSTALLED = 247,
-    TidyAttr_OnSTORAGE = 248,
-    TidyAttr_OnSUSPEND = 249,
-    TidyAttr_OnTIMEUPDATE = 250,
-    TidyAttr_OnUNDO = 251,
-    TidyAttr_OnVOLUMECHANGE = 252,
-    TidyAttr_OnWAITING = 253,
-    TidyAttr_PATTERN = 254,
-    TidyAttr_PLACEHOLDER = 255,
-    TidyAttr_POSTER = 256,
-    TidyAttr_PRELOAD = 257,
-    TidyAttr_PUBDATE = 258,
-    TidyAttr_RADIOGROUP = 259,
-    TidyAttr_REQUIRED = 260,
-    TidyAttr_REVERSED = 261,
-    TidyAttr_SANDBOX = 262,
-    TidyAttr_SCOPED = 263,
-    TidyAttr_SEAMLESS = 264,
-    TidyAttr_SIZES = 265,
-    TidyAttr_SPELLCHECK = 266,
-    TidyAttr_SRCDOC = 267,
-    TidyAttr_SRCLANG = 268,
-    TidyAttr_STEP = 269,
-    TidyAttr_ARIA_ACTIVEDESCENDANT = 270,
-    TidyAttr_ARIA_ATOMIC = 271,
-    TidyAttr_ARIA_AUTOCOMPLETE = 272,
-    TidyAttr_ARIA_BUSY = 273,
-    TidyAttr_ARIA_CHECKED = 274,
-    TidyAttr_ARIA_CONTROLS = 275,
-    TidyAttr_ARIA_DESCRIBEDBY = 276,
-    TidyAttr_ARIA_DISABLED = 277,
-    TidyAttr_ARIA_DROPEFFECT = 278,
-    TidyAttr_ARIA_EXPANDED = 279,
-    TidyAttr_ARIA_FLOWTO = 280,
-    TidyAttr_ARIA_GRABBED = 281,
-    TidyAttr_ARIA_HASPOPUP = 282,
-    TidyAttr_ARIA_HIDDEN = 283,
-    TidyAttr_ARIA_INVALID = 284,
-    TidyAttr_ARIA_LABEL = 285,
-    TidyAttr_ARIA_LABELLEDBY = 286,
-    TidyAttr_ARIA_LEVEL = 287,
-    TidyAttr_ARIA_LIVE = 288,
-    TidyAttr_ARIA_MULTILINE = 289,
-    TidyAttr_ARIA_MULTISELECTABLE = 290,
-    TidyAttr_ARIA_ORIENTATION = 291,
-    TidyAttr_ARIA_OWNS = 292,
-    TidyAttr_ARIA_POSINSET = 293,
-    TidyAttr_ARIA_PRESSED = 294,
-    TidyAttr_ARIA_READONLY = 295,
-    TidyAttr_ARIA_RELEVANT = 296,
-    TidyAttr_ARIA_REQUIRED = 297,
-    TidyAttr_ARIA_SELECTED = 298,
-    TidyAttr_ARIA_SETSIZE = 299,
-    TidyAttr_ARIA_SORT = 300,
-    TidyAttr_ARIA_VALUEMAX = 301,
-    TidyAttr_ARIA_VALUEMIN = 302,
-    TidyAttr_ARIA_VALUENOW = 303,
-    TidyAttr_ARIA_VALUETEXT = 304,
-    TidyAttr_X = 305,
-    TidyAttr_Y = 306,
-    TidyAttr_VIEWBOX = 307,
-    TidyAttr_PRESERVEASPECTRATIO = 308,
-    TidyAttr_ZOOMANDPAN = 309,
-    TidyAttr_BASEPROFILE = 310,
-    TidyAttr_CONTENTSCRIPTTYPE = 311,
-    TidyAttr_CONTENTSTYLETYPE = 312,
-    TidyAttr_DISPLAY = 313,
-    TidyAttr_ABOUT = 314,
-    TidyAttr_DATATYPE = 315,
-    TidyAttr_INLIST = 316,
-    TidyAttr_PREFIX = 317,
-    TidyAttr_PROPERTY = 318,
-    TidyAttr_RESOURCE = 319,
-    TidyAttr_TYPEOF = 320,
-    TidyAttr_VOCAB = 321,
-    N_TIDY_ATTRIBS = 322,
+    #[doc = "< DOWNLOAD="]
+    TidyAttr_DOWNLOAD = 48,
+    #[doc = "< ENCODING="]
+    TidyAttr_ENCODING = 49,
+    #[doc = "< ENCTYPE="]
+    TidyAttr_ENCTYPE = 50,
+    #[doc = "< FACE="]
+    TidyAttr_FACE = 51,
+    #[doc = "< FOR="]
+    TidyAttr_FOR = 52,
+    #[doc = "< FRAME="]
+    TidyAttr_FRAME = 53,
+    #[doc = "< FRAMEBORDER="]
+    TidyAttr_FRAMEBORDER = 54,
+    #[doc = "< FRAMESPACING="]
+    TidyAttr_FRAMESPACING = 55,
+    #[doc = "< GRIDX="]
+    TidyAttr_GRIDX = 56,
+    #[doc = "< GRIDY="]
+    TidyAttr_GRIDY = 57,
+    #[doc = "< HEADERS="]
+    TidyAttr_HEADERS = 58,
+    #[doc = "< HEIGHT="]
+    TidyAttr_HEIGHT = 59,
+    #[doc = "< HREF="]
+    TidyAttr_HREF = 60,
+    #[doc = "< HREFLANG="]
+    TidyAttr_HREFLANG = 61,
+    #[doc = "< HSPACE="]
+    TidyAttr_HSPACE = 62,
+    #[doc = "< HTTP_EQUIV="]
+    TidyAttr_HTTP_EQUIV = 63,
+    #[doc = "< ID="]
+    TidyAttr_ID = 64,
+    #[doc = "< IS="]
+    TidyAttr_IS = 65,
+    #[doc = "< ISMAP="]
+    TidyAttr_ISMAP = 66,
+    #[doc = "< ITEMID="]
+    TidyAttr_ITEMID = 67,
+    #[doc = "< ITEMPROP="]
+    TidyAttr_ITEMPROP = 68,
+    #[doc = "< ITEMREF="]
+    TidyAttr_ITEMREF = 69,
+    #[doc = "< ITEMSCOPE="]
+    TidyAttr_ITEMSCOPE = 70,
+    #[doc = "< ITEMTYPE="]
+    TidyAttr_ITEMTYPE = 71,
+    #[doc = "< LABEL="]
+    TidyAttr_LABEL = 72,
+    #[doc = "< LANG="]
+    TidyAttr_LANG = 73,
+    #[doc = "< LANGUAGE="]
+    TidyAttr_LANGUAGE = 74,
+    #[doc = "< LAST_MODIFIED="]
+    TidyAttr_LAST_MODIFIED = 75,
+    #[doc = "< LAST_VISIT="]
+    TidyAttr_LAST_VISIT = 76,
+    #[doc = "< LEFTMARGIN="]
+    TidyAttr_LEFTMARGIN = 77,
+    #[doc = "< LINK="]
+    TidyAttr_LINK = 78,
+    #[doc = "< LONGDESC="]
+    TidyAttr_LONGDESC = 79,
+    #[doc = "< LOWSRC="]
+    TidyAttr_LOWSRC = 80,
+    #[doc = "< MARGINHEIGHT="]
+    TidyAttr_MARGINHEIGHT = 81,
+    #[doc = "< MARGINWIDTH="]
+    TidyAttr_MARGINWIDTH = 82,
+    #[doc = "< MAXLENGTH="]
+    TidyAttr_MAXLENGTH = 83,
+    #[doc = "< MEDIA="]
+    TidyAttr_MEDIA = 84,
+    #[doc = "< METHOD="]
+    TidyAttr_METHOD = 85,
+    #[doc = "< MULTIPLE="]
+    TidyAttr_MULTIPLE = 86,
+    #[doc = "< NAME="]
+    TidyAttr_NAME = 87,
+    #[doc = "< NOHREF="]
+    TidyAttr_NOHREF = 88,
+    #[doc = "< NORESIZE="]
+    TidyAttr_NORESIZE = 89,
+    #[doc = "< NOSHADE="]
+    TidyAttr_NOSHADE = 90,
+    #[doc = "< NOWRAP="]
+    TidyAttr_NOWRAP = 91,
+    #[doc = "< OBJECT="]
+    TidyAttr_OBJECT = 92,
+    #[doc = "< OnAFTERUPDATE="]
+    TidyAttr_OnAFTERUPDATE = 93,
+    #[doc = "< OnBEFOREUNLOAD="]
+    TidyAttr_OnBEFOREUNLOAD = 94,
+    #[doc = "< OnBEFOREUPDATE="]
+    TidyAttr_OnBEFOREUPDATE = 95,
+    #[doc = "< OnBLUR="]
+    TidyAttr_OnBLUR = 96,
+    #[doc = "< OnCHANGE="]
+    TidyAttr_OnCHANGE = 97,
+    #[doc = "< OnCLICK="]
+    TidyAttr_OnCLICK = 98,
+    #[doc = "< OnDATAAVAILABLE="]
+    TidyAttr_OnDATAAVAILABLE = 99,
+    #[doc = "< OnDATASETCHANGED="]
+    TidyAttr_OnDATASETCHANGED = 100,
+    #[doc = "< OnDATASETCOMPLETE="]
+    TidyAttr_OnDATASETCOMPLETE = 101,
+    #[doc = "< OnDBLCLICK="]
+    TidyAttr_OnDBLCLICK = 102,
+    #[doc = "< OnERRORUPDATE="]
+    TidyAttr_OnERRORUPDATE = 103,
+    #[doc = "< OnFOCUS="]
+    TidyAttr_OnFOCUS = 104,
+    #[doc = "< OnKEYDOWN="]
+    TidyAttr_OnKEYDOWN = 105,
+    #[doc = "< OnKEYPRESS="]
+    TidyAttr_OnKEYPRESS = 106,
+    #[doc = "< OnKEYUP="]
+    TidyAttr_OnKEYUP = 107,
+    #[doc = "< OnLOAD="]
+    TidyAttr_OnLOAD = 108,
+    #[doc = "< OnMOUSEDOWN="]
+    TidyAttr_OnMOUSEDOWN = 109,
+    #[doc = "< OnMOUSEMOVE="]
+    TidyAttr_OnMOUSEMOVE = 110,
+    #[doc = "< OnMOUSEOUT="]
+    TidyAttr_OnMOUSEOUT = 111,
+    #[doc = "< OnMOUSEOVER="]
+    TidyAttr_OnMOUSEOVER = 112,
+    #[doc = "< OnMOUSEUP="]
+    TidyAttr_OnMOUSEUP = 113,
+    #[doc = "< OnRESET="]
+    TidyAttr_OnRESET = 114,
+    #[doc = "< OnROWENTER="]
+    TidyAttr_OnROWENTER = 115,
+    #[doc = "< OnROWEXIT="]
+    TidyAttr_OnROWEXIT = 116,
+    #[doc = "< OnSELECT="]
+    TidyAttr_OnSELECT = 117,
+    #[doc = "< OnSUBMIT="]
+    TidyAttr_OnSUBMIT = 118,
+    #[doc = "< OnUNLOAD="]
+    TidyAttr_OnUNLOAD = 119,
+    #[doc = "< PROFILE="]
+    TidyAttr_PROFILE = 120,
+    #[doc = "< PROMPT="]
+    TidyAttr_PROMPT = 121,
+    #[doc = "< RBSPAN="]
+    TidyAttr_RBSPAN = 122,
+    #[doc = "< READONLY="]
+    TidyAttr_READONLY = 123,
+    #[doc = "< REL="]
+    TidyAttr_REL = 124,
+    #[doc = "< REV="]
+    TidyAttr_REV = 125,
+    #[doc = "< RIGHTMARGIN="]
+    TidyAttr_RIGHTMARGIN = 126,
+    #[doc = "< ROLE="]
+    TidyAttr_ROLE = 127,
+    #[doc = "< ROWS="]
+    TidyAttr_ROWS = 128,
+    #[doc = "< ROWSPAN="]
+    TidyAttr_ROWSPAN = 129,
+    #[doc = "< RULES="]
+    TidyAttr_RULES = 130,
+    #[doc = "< SCHEME="]
+    TidyAttr_SCHEME = 131,
+    #[doc = "< SCOPE="]
+    TidyAttr_SCOPE = 132,
+    #[doc = "< SCROLLING="]
+    TidyAttr_SCROLLING = 133,
+    #[doc = "< SELECTED="]
+    TidyAttr_SELECTED = 134,
+    #[doc = "< SHAPE="]
+    TidyAttr_SHAPE = 135,
+    #[doc = "< SHOWGRID="]
+    TidyAttr_SHOWGRID = 136,
+    #[doc = "< SHOWGRIDX="]
+    TidyAttr_SHOWGRIDX = 137,
+    #[doc = "< SHOWGRIDY="]
+    TidyAttr_SHOWGRIDY = 138,
+    #[doc = "< SIZE="]
+    TidyAttr_SIZE = 139,
+    #[doc = "< SPAN="]
+    TidyAttr_SPAN = 140,
+    #[doc = "< SRC="]
+    TidyAttr_SRC = 141,
+    #[doc = "< SRCSET= (HTML5)"]
+    TidyAttr_SRCSET = 142,
+    #[doc = "< STANDBY="]
+    TidyAttr_STANDBY = 143,
+    #[doc = "< START="]
+    TidyAttr_START = 144,
+    #[doc = "< STYLE="]
+    TidyAttr_STYLE = 145,
+    #[doc = "< SUMMARY="]
+    TidyAttr_SUMMARY = 146,
+    #[doc = "< TABINDEX="]
+    TidyAttr_TABINDEX = 147,
+    #[doc = "< TARGET="]
+    TidyAttr_TARGET = 148,
+    #[doc = "< TEXT="]
+    TidyAttr_TEXT = 149,
+    #[doc = "< TITLE="]
+    TidyAttr_TITLE = 150,
+    #[doc = "< TOPMARGIN="]
+    TidyAttr_TOPMARGIN = 151,
+    #[doc = "< TRANSLATE="]
+    TidyAttr_TRANSLATE = 152,
+    #[doc = "< TYPE="]
+    TidyAttr_TYPE = 153,
+    #[doc = "< USEMAP="]
+    TidyAttr_USEMAP = 154,
+    #[doc = "< VALIGN="]
+    TidyAttr_VALIGN = 155,
+    #[doc = "< VALUE="]
+    TidyAttr_VALUE = 156,
+    #[doc = "< VALUETYPE="]
+    TidyAttr_VALUETYPE = 157,
+    #[doc = "< VERSION="]
+    TidyAttr_VERSION = 158,
+    #[doc = "< VLINK="]
+    TidyAttr_VLINK = 159,
+    #[doc = "< VSPACE="]
+    TidyAttr_VSPACE = 160,
+    #[doc = "< WIDTH="]
+    TidyAttr_WIDTH = 161,
+    #[doc = "< WRAP="]
+    TidyAttr_WRAP = 162,
+    #[doc = "< XML_LANG="]
+    TidyAttr_XML_LANG = 163,
+    #[doc = "< XML_SPACE="]
+    TidyAttr_XML_SPACE = 164,
+    #[doc = "< XMLNS="]
+    TidyAttr_XMLNS = 165,
+    #[doc = "< EVENT="]
+    TidyAttr_EVENT = 166,
+    #[doc = "< METHODS="]
+    TidyAttr_METHODS = 167,
+    #[doc = "< N="]
+    TidyAttr_N = 168,
+    #[doc = "< SDAFORM="]
+    TidyAttr_SDAFORM = 169,
+    #[doc = "< SDAPREF="]
+    TidyAttr_SDAPREF = 170,
+    #[doc = "< SDASUFF="]
+    TidyAttr_SDASUFF = 171,
+    #[doc = "< URN="]
+    TidyAttr_URN = 172,
+    #[doc = "< ASYNC="]
+    TidyAttr_ASYNC = 173,
+    #[doc = "< AUTOCOMPLETE="]
+    TidyAttr_AUTOCOMPLETE = 174,
+    #[doc = "< AUTOFOCUS="]
+    TidyAttr_AUTOFOCUS = 175,
+    #[doc = "< AUTOPLAY="]
+    TidyAttr_AUTOPLAY = 176,
+    #[doc = "< CHALLENGE="]
+    TidyAttr_CHALLENGE = 177,
+    #[doc = "< CONTENTEDITABLE="]
+    TidyAttr_CONTENTEDITABLE = 178,
+    #[doc = "< CONTEXTMENU="]
+    TidyAttr_CONTEXTMENU = 179,
+    #[doc = "< CONTROLS="]
+    TidyAttr_CONTROLS = 180,
+    #[doc = "< CROSSORIGIN="]
+    TidyAttr_CROSSORIGIN = 181,
+    #[doc = "< DEFAULT="]
+    TidyAttr_DEFAULT = 182,
+    #[doc = "< DIRNAME="]
+    TidyAttr_DIRNAME = 183,
+    #[doc = "< DRAGGABLE="]
+    TidyAttr_DRAGGABLE = 184,
+    #[doc = "< DROPZONE="]
+    TidyAttr_DROPZONE = 185,
+    #[doc = "< FORM="]
+    TidyAttr_FORM = 186,
+    #[doc = "< FORMACTION="]
+    TidyAttr_FORMACTION = 187,
+    #[doc = "< FORMENCTYPE="]
+    TidyAttr_FORMENCTYPE = 188,
+    #[doc = "< FORMMETHOD="]
+    TidyAttr_FORMMETHOD = 189,
+    #[doc = "< FORMNOVALIDATE="]
+    TidyAttr_FORMNOVALIDATE = 190,
+    #[doc = "< FORMTARGET="]
+    TidyAttr_FORMTARGET = 191,
+    #[doc = "< HIDDEN="]
+    TidyAttr_HIDDEN = 192,
+    #[doc = "< HIGH="]
+    TidyAttr_HIGH = 193,
+    #[doc = "< ICON="]
+    TidyAttr_ICON = 194,
+    #[doc = "< KEYTYPE="]
+    TidyAttr_KEYTYPE = 195,
+    #[doc = "< KIND="]
+    TidyAttr_KIND = 196,
+    #[doc = "< LIST="]
+    TidyAttr_LIST = 197,
+    #[doc = "< LOOP="]
+    TidyAttr_LOOP = 198,
+    #[doc = "< LOW="]
+    TidyAttr_LOW = 199,
+    #[doc = "< MANIFEST="]
+    TidyAttr_MANIFEST = 200,
+    #[doc = "< MAX="]
+    TidyAttr_MAX = 201,
+    #[doc = "< MEDIAGROUP="]
+    TidyAttr_MEDIAGROUP = 202,
+    #[doc = "< MIN="]
+    TidyAttr_MIN = 203,
+    #[doc = "< MUTED="]
+    TidyAttr_MUTED = 204,
+    #[doc = "< NOVALIDATE="]
+    TidyAttr_NOVALIDATE = 205,
+    #[doc = "< OPEN="]
+    TidyAttr_OPEN = 206,
+    #[doc = "< OPTIMUM="]
+    TidyAttr_OPTIMUM = 207,
+    #[doc = "< OnABORT="]
+    TidyAttr_OnABORT = 208,
+    #[doc = "< OnAFTERPRINT="]
+    TidyAttr_OnAFTERPRINT = 209,
+    #[doc = "< OnBEFOREPRINT="]
+    TidyAttr_OnBEFOREPRINT = 210,
+    #[doc = "< OnCANPLAY="]
+    TidyAttr_OnCANPLAY = 211,
+    #[doc = "< OnCANPLAYTHROUGH="]
+    TidyAttr_OnCANPLAYTHROUGH = 212,
+    #[doc = "< OnCONTEXTMENU="]
+    TidyAttr_OnCONTEXTMENU = 213,
+    #[doc = "< OnCUECHANGE="]
+    TidyAttr_OnCUECHANGE = 214,
+    #[doc = "< OnDRAG="]
+    TidyAttr_OnDRAG = 215,
+    #[doc = "< OnDRAGEND="]
+    TidyAttr_OnDRAGEND = 216,
+    #[doc = "< OnDRAGENTER="]
+    TidyAttr_OnDRAGENTER = 217,
+    #[doc = "< OnDRAGLEAVE="]
+    TidyAttr_OnDRAGLEAVE = 218,
+    #[doc = "< OnDRAGOVER="]
+    TidyAttr_OnDRAGOVER = 219,
+    #[doc = "< OnDRAGSTART="]
+    TidyAttr_OnDRAGSTART = 220,
+    #[doc = "< OnDROP="]
+    TidyAttr_OnDROP = 221,
+    #[doc = "< OnDURATIONCHANGE="]
+    TidyAttr_OnDURATIONCHANGE = 222,
+    #[doc = "< OnEMPTIED="]
+    TidyAttr_OnEMPTIED = 223,
+    #[doc = "< OnENDED="]
+    TidyAttr_OnENDED = 224,
+    #[doc = "< OnERROR="]
+    TidyAttr_OnERROR = 225,
+    #[doc = "< OnHASHCHANGE="]
+    TidyAttr_OnHASHCHANGE = 226,
+    #[doc = "< OnINPUT="]
+    TidyAttr_OnINPUT = 227,
+    #[doc = "< OnINVALID="]
+    TidyAttr_OnINVALID = 228,
+    #[doc = "< OnLOADEDDATA="]
+    TidyAttr_OnLOADEDDATA = 229,
+    #[doc = "< OnLOADEDMETADATA="]
+    TidyAttr_OnLOADEDMETADATA = 230,
+    #[doc = "< OnLOADSTART="]
+    TidyAttr_OnLOADSTART = 231,
+    #[doc = "< OnMESSAGE="]
+    TidyAttr_OnMESSAGE = 232,
+    #[doc = "< OnMOUSEWHEEL="]
+    TidyAttr_OnMOUSEWHEEL = 233,
+    #[doc = "< OnOFFLINE="]
+    TidyAttr_OnOFFLINE = 234,
+    #[doc = "< OnONLINE="]
+    TidyAttr_OnONLINE = 235,
+    #[doc = "< OnPAGEHIDE="]
+    TidyAttr_OnPAGEHIDE = 236,
+    #[doc = "< OnPAGESHOW="]
+    TidyAttr_OnPAGESHOW = 237,
+    #[doc = "< OnPAUSE="]
+    TidyAttr_OnPAUSE = 238,
+    #[doc = "< OnPLAY="]
+    TidyAttr_OnPLAY = 239,
+    #[doc = "< OnPLAYING="]
+    TidyAttr_OnPLAYING = 240,
+    #[doc = "< OnPOPSTATE="]
+    TidyAttr_OnPOPSTATE = 241,
+    #[doc = "< OnPROGRESS="]
+    TidyAttr_OnPROGRESS = 242,
+    #[doc = "< OnRATECHANGE="]
+    TidyAttr_OnRATECHANGE = 243,
+    #[doc = "< OnREADYSTATECHANGE="]
+    TidyAttr_OnREADYSTATECHANGE = 244,
+    #[doc = "< OnREDO="]
+    TidyAttr_OnREDO = 245,
+    #[doc = "< OnRESIZE="]
+    TidyAttr_OnRESIZE = 246,
+    #[doc = "< OnSCROLL="]
+    TidyAttr_OnSCROLL = 247,
+    #[doc = "< OnSEEKED="]
+    TidyAttr_OnSEEKED = 248,
+    #[doc = "< OnSEEKING="]
+    TidyAttr_OnSEEKING = 249,
+    #[doc = "< OnSHOW="]
+    TidyAttr_OnSHOW = 250,
+    #[doc = "< OnSTALLED="]
+    TidyAttr_OnSTALLED = 251,
+    #[doc = "< OnSTORAGE="]
+    TidyAttr_OnSTORAGE = 252,
+    #[doc = "< OnSUSPEND="]
+    TidyAttr_OnSUSPEND = 253,
+    #[doc = "< OnTIMEUPDATE="]
+    TidyAttr_OnTIMEUPDATE = 254,
+    #[doc = "< OnUNDO="]
+    TidyAttr_OnUNDO = 255,
+    #[doc = "< OnVOLUMECHANGE="]
+    TidyAttr_OnVOLUMECHANGE = 256,
+    #[doc = "< OnWAITING="]
+    TidyAttr_OnWAITING = 257,
+    #[doc = "< PATTERN="]
+    TidyAttr_PATTERN = 258,
+    #[doc = "< PLACEHOLDER="]
+    TidyAttr_PLACEHOLDER = 259,
+    #[doc = "< PLAYSINLINE="]
+    TidyAttr_PLAYSINLINE = 260,
+    #[doc = "< POSTER="]
+    TidyAttr_POSTER = 261,
+    #[doc = "< PRELOAD="]
+    TidyAttr_PRELOAD = 262,
+    #[doc = "< PUBDATE="]
+    TidyAttr_PUBDATE = 263,
+    #[doc = "< RADIOGROUP="]
+    TidyAttr_RADIOGROUP = 264,
+    #[doc = "< REQUIRED="]
+    TidyAttr_REQUIRED = 265,
+    #[doc = "< REVERSED="]
+    TidyAttr_REVERSED = 266,
+    #[doc = "< SANDBOX="]
+    TidyAttr_SANDBOX = 267,
+    #[doc = "< SCOPED="]
+    TidyAttr_SCOPED = 268,
+    #[doc = "< SEAMLESS="]
+    TidyAttr_SEAMLESS = 269,
+    #[doc = "< SIZES="]
+    TidyAttr_SIZES = 270,
+    #[doc = "< SPELLCHECK="]
+    TidyAttr_SPELLCHECK = 271,
+    #[doc = "< SRCDOC="]
+    TidyAttr_SRCDOC = 272,
+    #[doc = "< SRCLANG="]
+    TidyAttr_SRCLANG = 273,
+    #[doc = "< STEP="]
+    TidyAttr_STEP = 274,
+    #[doc = "< ARIA_ACTIVEDESCENDANT"]
+    TidyAttr_ARIA_ACTIVEDESCENDANT = 275,
+    #[doc = "< ARIA_ATOMIC="]
+    TidyAttr_ARIA_ATOMIC = 276,
+    #[doc = "< ARIA_AUTOCOMPLETE="]
+    TidyAttr_ARIA_AUTOCOMPLETE = 277,
+    #[doc = "< ARIA_BUSY="]
+    TidyAttr_ARIA_BUSY = 278,
+    #[doc = "< ARIA_CHECKED="]
+    TidyAttr_ARIA_CHECKED = 279,
+    #[doc = "< ARIA_CONTROLS="]
+    TidyAttr_ARIA_CONTROLS = 280,
+    #[doc = "< ARIA_DESCRIBEDBY="]
+    TidyAttr_ARIA_DESCRIBEDBY = 281,
+    #[doc = "< ARIA_DISABLED="]
+    TidyAttr_ARIA_DISABLED = 282,
+    #[doc = "< ARIA_DROPEFFECT="]
+    TidyAttr_ARIA_DROPEFFECT = 283,
+    #[doc = "< ARIA_EXPANDED="]
+    TidyAttr_ARIA_EXPANDED = 284,
+    #[doc = "< ARIA_FLOWTO="]
+    TidyAttr_ARIA_FLOWTO = 285,
+    #[doc = "< ARIA_GRABBED="]
+    TidyAttr_ARIA_GRABBED = 286,
+    #[doc = "< ARIA_HASPOPUP="]
+    TidyAttr_ARIA_HASPOPUP = 287,
+    #[doc = "< ARIA_HIDDEN="]
+    TidyAttr_ARIA_HIDDEN = 288,
+    #[doc = "< ARIA_INVALID="]
+    TidyAttr_ARIA_INVALID = 289,
+    #[doc = "< ARIA_LABEL="]
+    TidyAttr_ARIA_LABEL = 290,
+    #[doc = "< ARIA_LABELLEDBY="]
+    TidyAttr_ARIA_LABELLEDBY = 291,
+    #[doc = "< ARIA_LEVEL="]
+    TidyAttr_ARIA_LEVEL = 292,
+    #[doc = "< ARIA_LIVE="]
+    TidyAttr_ARIA_LIVE = 293,
+    #[doc = "< ARIA_MULTILINE="]
+    TidyAttr_ARIA_MULTILINE = 294,
+    #[doc = "< ARIA_MULTISELECTABLE="]
+    TidyAttr_ARIA_MULTISELECTABLE = 295,
+    #[doc = "< ARIA_ORIENTATION="]
+    TidyAttr_ARIA_ORIENTATION = 296,
+    #[doc = "< ARIA_OWNS="]
+    TidyAttr_ARIA_OWNS = 297,
+    #[doc = "< ARIA_POSINSET="]
+    TidyAttr_ARIA_POSINSET = 298,
+    #[doc = "< ARIA_PRESSED="]
+    TidyAttr_ARIA_PRESSED = 299,
+    #[doc = "< ARIA_READONLY="]
+    TidyAttr_ARIA_READONLY = 300,
+    #[doc = "< ARIA_RELEVANT="]
+    TidyAttr_ARIA_RELEVANT = 301,
+    #[doc = "< ARIA_REQUIRED="]
+    TidyAttr_ARIA_REQUIRED = 302,
+    #[doc = "< ARIA_SELECTED="]
+    TidyAttr_ARIA_SELECTED = 303,
+    #[doc = "< ARIA_SETSIZE="]
+    TidyAttr_ARIA_SETSIZE = 304,
+    #[doc = "< ARIA_SORT="]
+    TidyAttr_ARIA_SORT = 305,
+    #[doc = "< ARIA_VALUEMAX="]
+    TidyAttr_ARIA_VALUEMAX = 306,
+    #[doc = "< ARIA_VALUEMIN="]
+    TidyAttr_ARIA_VALUEMIN = 307,
+    #[doc = "< ARIA_VALUENOW="]
+    TidyAttr_ARIA_VALUENOW = 308,
+    #[doc = "< ARIA_VALUETEXT="]
+    TidyAttr_ARIA_VALUETEXT = 309,
+    #[doc = "< X="]
+    TidyAttr_X = 310,
+    #[doc = "< Y="]
+    TidyAttr_Y = 311,
+    #[doc = "< VIEWBOX="]
+    TidyAttr_VIEWBOX = 312,
+    #[doc = "< PRESERVEASPECTRATIO="]
+    TidyAttr_PRESERVEASPECTRATIO = 313,
+    #[doc = "< ZOOMANDPAN="]
+    TidyAttr_ZOOMANDPAN = 314,
+    #[doc = "< BASEPROFILE="]
+    TidyAttr_BASEPROFILE = 315,
+    #[doc = "< CONTENTSCRIPTTYPE="]
+    TidyAttr_CONTENTSCRIPTTYPE = 316,
+    #[doc = "< CONTENTSTYLETYPE="]
+    TidyAttr_CONTENTSTYLETYPE = 317,
+    #[doc = "< DISPLAY= (html5)"]
+    TidyAttr_DISPLAY = 318,
+    #[doc = "< ABOUT="]
+    TidyAttr_ABOUT = 319,
+    #[doc = "< DATATYPE="]
+    TidyAttr_DATATYPE = 320,
+    #[doc = "< INLIST="]
+    TidyAttr_INLIST = 321,
+    #[doc = "< PREFIX="]
+    TidyAttr_PREFIX = 322,
+    #[doc = "< PROPERTY="]
+    TidyAttr_PROPERTY = 323,
+    #[doc = "< RESOURCE="]
+    TidyAttr_RESOURCE = 324,
+    #[doc = "< TYPEOF="]
+    TidyAttr_TYPEOF = 325,
+    #[doc = "< VOCAB="]
+    TidyAttr_VOCAB = 326,
+    #[doc = "< INTEGRITY="]
+    TidyAttr_INTEGRITY = 327,
+    #[doc = "< AS="]
+    TidyAttr_AS = 328,
+    #[doc = "< svg xmls:xlink=\"url\""]
+    TidyAttr_XMLNSXLINK = 329,
+    #[doc = "< SLOT="]
+    TidyAttr_SLOT = 330,
+    #[doc = "< LOADING="]
+    TidyAttr_LOADING = 331,
+    #[doc = "< FILL="]
+    TidyAttr_FILL = 332,
+    #[doc = "< FILLRULE="]
+    TidyAttr_FILLRULE = 333,
+    #[doc = "< STROKE="]
+    TidyAttr_STROKE = 334,
+    #[doc = "< STROKEDASHARRAY="]
+    TidyAttr_STROKEDASHARRAY = 335,
+    #[doc = "< STROKEDASHOFFSET="]
+    TidyAttr_STROKEDASHOFFSET = 336,
+    #[doc = "< STROKELINECAP="]
+    TidyAttr_STROKELINECAP = 337,
+    #[doc = "< STROKELINEJOIN="]
+    TidyAttr_STROKELINEJOIN = 338,
+    #[doc = "< STROKEMITERLIMIT="]
+    TidyAttr_STROKEMITERLIMIT = 339,
+    #[doc = "< STROKEWIDTH="]
+    TidyAttr_STROKEWIDTH = 340,
+    #[doc = "< COLORINTERPOLATION="]
+    TidyAttr_COLORINTERPOLATION = 341,
+    #[doc = "< COLORRENDERING="]
+    TidyAttr_COLORRENDERING = 342,
+    #[doc = "< OPACITY="]
+    TidyAttr_OPACITY = 343,
+    #[doc = "< STROKEOPACITY="]
+    TidyAttr_STROKEOPACITY = 344,
+    #[doc = "< FILLOPACITY="]
+    TidyAttr_FILLOPACITY = 345,
+    #[doc = "< Must be last"]
+    N_TIDY_ATTRIBS = 346,
+}
+impl TidyReportLevel {
+    pub const TidyDialogueDoc: TidyReportLevel = TidyReportLevel::TidyDialogueFootnote;
+}
+#[repr(u32)]
+#[doc = " Message severity level, used throughout LibTidy to indicate the severity"]
+#[doc = " or status of a message"]
+#[doc = ""]
+#[doc = " @remark These enum members all have associated localized strings available"]
+#[doc = "         via their enum values. These strings are suitable for use as labels."]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum TidyReportLevel {
+    #[doc = "< Report: Information about markup usage"]
+    TidyInfo = 350,
+    #[doc = "< Report: Warning message"]
+    TidyWarning = 351,
+    #[doc = "< Report: Configuration error"]
+    TidyConfig = 352,
+    #[doc = "< Report: Accessibility message"]
+    TidyAccess = 353,
+    #[doc = "< Report: Error message - output suppressed"]
+    TidyError = 354,
+    #[doc = "< Report: I/O or file system error"]
+    TidyBadDocument = 355,
+    #[doc = "< Report: Crash!"]
+    TidyFatal = 356,
+    #[doc = "< Dialogue: Summary-related information"]
+    TidyDialogueSummary = 357,
+    #[doc = "< Dialogue: Non-document related information"]
+    TidyDialogueInfo = 358,
+    #[doc = "< Dialogue: Footnote"]
+    TidyDialogueFootnote = 359,
+}
+#[repr(u32)]
+#[doc = " Indicates the data type of a format string parameter used when Tidy"]
+#[doc = " emits reports and dialogue as part of the messaging callback functions."]
+#[doc = " See `messageobj.h` for more information on this API."]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum TidyFormatParameterType {
+    #[doc = "< Argument is signed integer."]
+    tidyFormatType_INT = 0,
+    #[doc = "< Argument is unsigned integer."]
+    tidyFormatType_UINT = 1,
+    #[doc = "< Argument is a string."]
+    tidyFormatType_STRING = 2,
+    #[doc = "< Argument is a double."]
+    tidyFormatType_DOUBLE = 3,
+    #[doc = "< Argument type is unknown!"]
+    tidyFormatType_UNKNOWN = 20,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -718,1064 +1451,1421 @@ pub struct _TidyAttr {
     pub _opaque: ::std::os::raw::c_int,
 }
 pub type TidyAttr = *const _TidyAttr;
-pub type TidyBuffer = _TidyBuffer;
-pub type TidyAllocatorVtbl = _TidyAllocatorVtbl;
-pub type TidyAllocator = _TidyAllocator;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct _TidyAllocatorVtbl {
-    pub alloc: ::std::option::Option<
-        unsafe extern "C" fn(
-            self_: *mut TidyAllocator,
-            nBytes: size_t,
-        ) -> *mut ::std::os::raw::c_void,
-    >,
-    pub realloc: ::std::option::Option<
-        unsafe extern "C" fn(
-            self_: *mut TidyAllocator,
-            block: *mut ::std::os::raw::c_void,
-            nBytes: size_t,
-        ) -> *mut ::std::os::raw::c_void,
-    >,
-    pub free: ::std::option::Option<
-        unsafe extern "C" fn(self_: *mut TidyAllocator, block: *mut ::std::os::raw::c_void),
-    >,
-    pub panic: ::std::option::Option<unsafe extern "C" fn(self_: *mut TidyAllocator, msg: ctmbstr)>,
+pub struct _TidyMessage {
+    pub _opaque: ::std::os::raw::c_int,
 }
+pub type TidyMessage = *const _TidyMessage;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _TidyMessageArgument {
+    pub _opaque: ::std::os::raw::c_int,
+}
+pub type TidyMessageArgument = *const _TidyMessageArgument;
+pub type TidyAllocatorVtbl = _TidyAllocatorVtbl;
+pub type TidyAllocator = _TidyAllocator;
+#[doc = " Tidy's built-in default allocator."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _TidyAllocator {
+    #[doc = "< The allocator's function table."]
     pub vtbl: *const TidyAllocatorVtbl,
 }
-pub type TidyMalloc =
-    ::std::option::Option<unsafe extern "C" fn(len: size_t) -> *mut ::std::os::raw::c_void>;
-pub type TidyRealloc = ::std::option::Option<
-    unsafe extern "C" fn(
-        buf: *mut ::std::os::raw::c_void,
-        len: size_t,
-    ) -> *mut ::std::os::raw::c_void,
->;
+#[doc = " @defgroup Memory Memory Allocation"]
+#[doc = ""]
+#[doc = " Tidy can use a user-provided allocator for all memory allocations.  If this"]
+#[doc = " allocator is not provided, then a default allocator is used which simply"]
+#[doc = " wraps standard C malloc()/free() calls. These wrappers call the panic()"]
+#[doc = " function upon any failure. The default panic function prints an out of"]
+#[doc = " memory message to **stderr**, and calls `exit(2)`."]
+#[doc = ""]
+#[doc = " For applications in which it is unacceptable to abort in the case of memory"]
+#[doc = " allocation, then the panic function can be replaced with one which"]
+#[doc = " `longjmps()` out of the LibTidy code. For this to clean up completely, you"]
+#[doc = " should be careful not to use any Tidy methods that open files as these will"]
+#[doc = " not be closed before `panic()` is called."]
+#[doc = ""]
+#[doc = " Calling the `xxxWithAllocator()` family (`tidyCreateWithAllocator`,"]
+#[doc = " `tidyBufInitWithAllocator`, `tidyBufAllocWithAllocator`) allow setting"]
+#[doc = " custom allocators."]
+#[doc = ""]
+#[doc = " All parts of the document use the same allocator. Calls that require a"]
+#[doc = " user-provided buffer can optionally use a different allocator."]
+#[doc = ""]
+#[doc = " For reference in designing a plug-in allocator, most allocations made by"]
+#[doc = " LibTidy are less than 100 bytes, corresponding to attribute names and"]
+#[doc = " values, etc."]
+#[doc = ""]
+#[doc = " There is also an additional class of much larger allocations which are where"]
+#[doc = " most of the data from the lexer is stored. It is not currently possible to"]
+#[doc = " use a separate allocator for the lexer; this would be a useful extension."]
+#[doc = ""]
+#[doc = " In general, approximately 1/3rd of the memory used by LibTidy is freed"]
+#[doc = " during the parse, so if memory usage is an issue then an allocator that can"]
+#[doc = " reuse this memory is a good idea."]
+#[doc = ""]
+#[doc = " **To create your own allocator, do something like the following:**"]
+#[doc = " @code{.c}"]
+#[doc = " typedef struct _MyAllocator {"]
+#[doc = "    TidyAllocator base;"]
+#[doc = "    // ...other custom allocator state..."]
+#[doc = " } MyAllocator;"]
+#[doc = ""]
+#[doc = " void* MyAllocator_alloc(TidyAllocator *base, void *block, size_t nBytes) {"]
+#[doc = "     MyAllocator *self = (MyAllocator*)base;"]
+#[doc = "     // ..."]
+#[doc = " }"]
+#[doc = " // etc."]
+#[doc = ""]
+#[doc = " static const TidyAllocatorVtbl MyAllocatorVtbl = {"]
+#[doc = "     MyAllocator_alloc,"]
+#[doc = "     MyAllocator_realloc,"]
+#[doc = "     MyAllocator_free,"]
+#[doc = "     MyAllocator_panic"]
+#[doc = " };"]
+#[doc = ""]
+#[doc = " myAllocator allocator;"]
+#[doc = " TidyDoc doc;"]
+#[doc = ""]
+#[doc = " allocator.base.vtbl = &MyAllocatorVtbl;"]
+#[doc = " //...initialise allocator specific state..."]
+#[doc = " doc = tidyCreateWithAllocator(&allocator);"]
+#[doc = " @endcode"]
+#[doc = ""]
+#[doc = " Although this looks slightly long-winded, the advantage is that to create a"]
+#[doc = " custom allocator you simply need to set the vtbl pointer correctly. The vtbl"]
+#[doc = " itself can reside in static/global data, and hence does not need to be"]
+#[doc = " initialised each time an allocator is created, and furthermore the memory"]
+#[doc = " is shared amongst all created allocators."]
+#[doc = ""]
+#[doc = " @{"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _TidyAllocatorVtbl {
+    pub alloc: ::std::option::Option<unsafe extern "C" fn(self_: *mut TidyAllocator, nBytes: size_t) -> *mut ::std::os::raw::c_void>,
+    pub realloc: ::std::option::Option<unsafe extern "C" fn(self_: *mut TidyAllocator, block: *mut ::std::os::raw::c_void, nBytes: size_t) -> *mut ::std::os::raw::c_void>,
+    pub free: ::std::option::Option<unsafe extern "C" fn(self_: *mut TidyAllocator, block: *mut ::std::os::raw::c_void)>,
+    pub panic: ::std::option::Option<unsafe extern "C" fn(self_: *mut TidyAllocator, msg: ctmbstr)>,
+}
+#[doc = " Callback for `malloc` replacement"]
+pub type TidyMalloc = ::std::option::Option<unsafe extern "C" fn(len: size_t) -> *mut ::std::os::raw::c_void>;
+#[doc = " Callback for `realloc` replacement"]
+pub type TidyRealloc = ::std::option::Option<unsafe extern "C" fn(buf: *mut ::std::os::raw::c_void, len: size_t) -> *mut ::std::os::raw::c_void>;
+#[doc = " Callback for `free` replacement"]
 pub type TidyFree = ::std::option::Option<unsafe extern "C" fn(buf: *mut ::std::os::raw::c_void)>;
+#[doc = " Callback for out of memory panic state"]
 pub type TidyPanic = ::std::option::Option<unsafe extern "C" fn(mssg: ctmbstr)>;
 extern "C" {
+    #[doc = " Give Tidy a `malloc()` replacement"]
     pub fn tidySetMallocCall(fmalloc: TidyMalloc) -> Bool;
 }
 extern "C" {
+    #[doc = " Give Tidy a `realloc()` replacement"]
     pub fn tidySetReallocCall(frealloc: TidyRealloc) -> Bool;
 }
 extern "C" {
+    #[doc = " Give Tidy a `free()` replacement"]
     pub fn tidySetFreeCall(ffree: TidyFree) -> Bool;
 }
 extern "C" {
+    #[doc = " Give Tidy an \"out of memory\" handler"]
     pub fn tidySetPanicCall(fpanic: TidyPanic) -> Bool;
 }
 extern "C" {
+    #[doc = " The primary creation of a document instance. Instances of a TidyDoc are used"]
+    #[doc = " throughout the API as a token to represent a particular document. You must"]
+    #[doc = " create at least one TidyDoc instance to initialize the library and begin"]
+    #[doc = " interaction with the API. When done using a TidyDoc instance, be sure to"]
+    #[doc = " `tidyRelease(myTidyDoc);` in order to free related memory."]
+    #[doc = " @result Returns a TidyDoc instance."]
     pub fn tidyCreate() -> TidyDoc;
 }
 extern "C" {
+    #[doc = " Create a document supplying your own, custom TidyAllocator instead of using"]
+    #[doc = " the built-in default. See the @ref Memory module if you want to create and"]
+    #[doc = " use your own allocator."]
+    #[doc = " @param allocator The allocator to use for creating the document."]
+    #[doc = " @result Returns a TidyDoc instance."]
     pub fn tidyCreateWithAllocator(allocator: *mut TidyAllocator) -> TidyDoc;
 }
 extern "C" {
+    #[doc = " Free all memory and release the TidyDoc. The TidyDoc can not be used after"]
+    #[doc = " this call."]
+    #[doc = " @param tdoc The TidyDoc to free."]
     pub fn tidyRelease(tdoc: TidyDoc);
 }
 extern "C" {
+    #[doc = " Allows the host application to store a chunk of data with each TidyDoc"]
+    #[doc = " instance. This can be useful for callbacks, such as saving a reference to"]
+    #[doc = " `self` within the document."]
     pub fn tidySetAppData(tdoc: TidyDoc, appData: *mut ::std::os::raw::c_void);
 }
 extern "C" {
+    #[doc = " Returns the data previously stored with `tidySetAppData()`."]
+    #[doc = " @param tdoc  document where data has been stored."]
+    #[doc = " @result The pointer to the data block previously stored."]
     pub fn tidyGetAppData(tdoc: TidyDoc) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
+    #[doc = " Get the release date for the current library."]
+    #[doc = " @result The string representing the release date."]
     pub fn tidyReleaseDate() -> ctmbstr;
 }
 extern "C" {
+    #[doc = " Get the version number for the current library."]
+    #[doc = " @result The string representing the version number."]
     pub fn tidyLibraryVersion() -> ctmbstr;
 }
 extern "C" {
+    #[doc = " Get the platform for which Tidy was built."]
+    #[doc = " @result The string representing the version number."]
+    pub fn tidyPlatform() -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get status of current document."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns the highest of `2` indicating that errors were present in"]
+    #[doc = "         the document, `1` indicating warnings, and `0` in the case of"]
+    #[doc = "         everything being okay."]
     pub fn tidyStatus(tdoc: TidyDoc) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    #[doc = " Gets the version of HTML that was output, as an integer, times 100. For"]
+    #[doc = " example, HTML5 will return 500; HTML4.0.1 will return 401."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns the HTML version number (x100)."]
     pub fn tidyDetectedHtmlVersion(tdoc: TidyDoc) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    #[doc = " Indicates whether the output document is or isn't XHTML."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns `yes` if the document is an XHTML type."]
     pub fn tidyDetectedXhtml(tdoc: TidyDoc) -> Bool;
 }
 extern "C" {
+    #[doc = " Indicates whether or not the input document was XML. If TidyXml tags is"]
+    #[doc = " true, or there was an XML declaration in the input document, then this"]
+    #[doc = " function will return yes."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns `yes` if the input document was XML."]
     pub fn tidyDetectedGenericXml(tdoc: TidyDoc) -> Bool;
 }
 extern "C" {
+    #[doc = " Indicates the number of TidyError messages that were generated. For any"]
+    #[doc = " value greater than `0`, output is suppressed unless TidyForceOutput is set."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns the number of TidyError messages that were generated."]
     pub fn tidyErrorCount(tdoc: TidyDoc) -> uint;
 }
 extern "C" {
+    #[doc = " Indicates the number of TidyWarning messages that were generated."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns the number of TidyWarning messages that were generated."]
     pub fn tidyWarningCount(tdoc: TidyDoc) -> uint;
 }
 extern "C" {
+    #[doc = " Indicates the number of TidyAccess messages that were generated."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns the number of TidyAccess messages that were generated."]
     pub fn tidyAccessWarningCount(tdoc: TidyDoc) -> uint;
 }
 extern "C" {
+    #[doc = " Indicates the number of configuration error messages that were generated."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns the number of configuration error messages that were"]
+    #[doc = "         generated."]
     pub fn tidyConfigErrorCount(tdoc: TidyDoc) -> uint;
 }
 extern "C" {
-    pub fn tidyLoadConfig(tdoc: TidyDoc, configFile: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyLoadConfigEnc(
-        tdoc: TidyDoc,
-        configFile: ctmbstr,
-        charenc: ctmbstr,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyFileExists(tdoc: TidyDoc, filename: ctmbstr) -> Bool;
-}
-extern "C" {
-    pub fn tidySetCharEncoding(tdoc: TidyDoc, encnam: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySetInCharEncoding(tdoc: TidyDoc, encnam: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySetOutCharEncoding(tdoc: TidyDoc, encnam: ctmbstr) -> ::std::os::raw::c_int;
-}
-pub type TidyOptCallback =
-    ::std::option::Option<unsafe extern "C" fn(option: ctmbstr, value: ctmbstr) -> Bool>;
-extern "C" {
-    pub fn tidySetOptionCallback(tdoc: TidyDoc, pOptCallback: TidyOptCallback) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptGetIdForName(optnam: ctmbstr) -> TidyOptionId;
-}
-extern "C" {
-    pub fn tidyGetOptionList(tdoc: TidyDoc) -> TidyIterator;
-}
-extern "C" {
-    pub fn tidyGetNextOption(tdoc: TidyDoc, pos: *mut TidyIterator) -> TidyOption;
-}
-extern "C" {
-    pub fn tidyGetOption(tdoc: TidyDoc, optId: TidyOptionId) -> TidyOption;
-}
-extern "C" {
-    pub fn tidyGetOptionByName(tdoc: TidyDoc, optnam: ctmbstr) -> TidyOption;
-}
-extern "C" {
-    pub fn tidyOptGetId(opt: TidyOption) -> TidyOptionId;
-}
-extern "C" {
-    pub fn tidyOptGetName(opt: TidyOption) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetType(opt: TidyOption) -> TidyOptionType;
-}
-extern "C" {
-    pub fn tidyOptIsReadOnly(opt: TidyOption) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptGetCategory(opt: TidyOption) -> TidyConfigCategory;
-}
-extern "C" {
-    pub fn tidyOptGetDefault(opt: TidyOption) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetDefaultInt(opt: TidyOption) -> ulong;
-}
-extern "C" {
-    pub fn tidyOptGetDefaultBool(opt: TidyOption) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptGetPickList(opt: TidyOption) -> TidyIterator;
-}
-extern "C" {
-    pub fn tidyOptGetNextPick(opt: TidyOption, pos: *mut TidyIterator) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetValue(tdoc: TidyDoc, optId: TidyOptionId) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptSetValue(tdoc: TidyDoc, optId: TidyOptionId, val: ctmbstr) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptParseValue(tdoc: TidyDoc, optnam: ctmbstr, val: ctmbstr) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptGetInt(tdoc: TidyDoc, optId: TidyOptionId) -> ulong;
-}
-extern "C" {
-    pub fn tidyOptSetInt(tdoc: TidyDoc, optId: TidyOptionId, val: ulong) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptGetBool(tdoc: TidyDoc, optId: TidyOptionId) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptSetBool(tdoc: TidyDoc, optId: TidyOptionId, val: Bool) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptResetToDefault(tdoc: TidyDoc, opt: TidyOptionId) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptResetAllToDefault(tdoc: TidyDoc) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptSnapshot(tdoc: TidyDoc) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptResetToSnapshot(tdoc: TidyDoc) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptDiffThanDefault(tdoc: TidyDoc) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptDiffThanSnapshot(tdoc: TidyDoc) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptCopyConfig(tdocTo: TidyDoc, tdocFrom: TidyDoc) -> Bool;
-}
-extern "C" {
-    pub fn tidyOptGetEncName(tdoc: TidyDoc, optId: TidyOptionId) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetCurrPick(tdoc: TidyDoc, optId: TidyOptionId) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetDeclTagList(tdoc: TidyDoc) -> TidyIterator;
-}
-extern "C" {
-    pub fn tidyOptGetNextDeclTag(
-        tdoc: TidyDoc,
-        optId: TidyOptionId,
-        iter: *mut TidyIterator,
-    ) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetDoc(tdoc: TidyDoc, opt: TidyOption) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyOptGetDocLinksList(tdoc: TidyDoc, opt: TidyOption) -> TidyIterator;
-}
-extern "C" {
-    pub fn tidyOptGetNextDocLinks(tdoc: TidyDoc, pos: *mut TidyIterator) -> TidyOption;
-}
-pub type TidyGetByteFunc = ::std::option::Option<
-    unsafe extern "C" fn(sourceData: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_int,
->;
-pub type TidyUngetByteFunc =
-    ::std::option::Option<unsafe extern "C" fn(sourceData: *mut ::std::os::raw::c_void, bt: byte)>;
-pub type TidyEOFFunc =
-    ::std::option::Option<unsafe extern "C" fn(sourceData: *mut ::std::os::raw::c_void) -> Bool>;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct _TidyInputSource {
-    pub sourceData: *mut ::std::os::raw::c_void,
-    pub getByte: TidyGetByteFunc,
-    pub ungetByte: TidyUngetByteFunc,
-    pub eof: TidyEOFFunc,
-}
-pub type TidyInputSource = _TidyInputSource;
-extern "C" {
-    pub fn tidyInitSource(
-        source: *mut TidyInputSource,
-        srcData: *mut ::std::os::raw::c_void,
-        gbFunc: TidyGetByteFunc,
-        ugbFunc: TidyUngetByteFunc,
-        endFunc: TidyEOFFunc,
-    ) -> Bool;
-}
-extern "C" {
-    pub fn tidyGetByte(source: *mut TidyInputSource) -> uint;
-}
-extern "C" {
-    pub fn tidyUngetByte(source: *mut TidyInputSource, byteValue: uint);
-}
-extern "C" {
-    pub fn tidyIsEOF(source: *mut TidyInputSource) -> Bool;
-}
-pub type TidyPutByteFunc =
-    ::std::option::Option<unsafe extern "C" fn(sinkData: *mut ::std::os::raw::c_void, bt: byte)>;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct _TidyOutputSink {
-    pub sinkData: *mut ::std::os::raw::c_void,
-    pub putByte: TidyPutByteFunc,
-}
-pub type TidyOutputSink = _TidyOutputSink;
-extern "C" {
-    pub fn tidyInitSink(
-        sink: *mut TidyOutputSink,
-        snkData: *mut ::std::os::raw::c_void,
-        pbFunc: TidyPutByteFunc,
-    ) -> Bool;
-}
-extern "C" {
-    pub fn tidyPutByte(sink: *mut TidyOutputSink, byteValue: uint);
-}
-pub type TidyReportFilter = ::std::option::Option<
-    unsafe extern "C" fn(
-        tdoc: TidyDoc,
-        lvl: TidyReportLevel,
-        line: uint,
-        col: uint,
-        mssg: ctmbstr,
-    ) -> Bool,
->;
-pub type TidyReportFilter2 = ::std::option::Option<
-    unsafe extern "C" fn(
-        tdoc: TidyDoc,
-        lvl: TidyReportLevel,
-        line: uint,
-        col: uint,
-        mssg: ctmbstr,
-        args: *mut __va_list_tag,
-    ) -> Bool,
->;
-pub type TidyReportFilter3 = ::std::option::Option<
-    unsafe extern "C" fn(
-        tdoc: TidyDoc,
-        lvl: TidyReportLevel,
-        line: uint,
-        col: uint,
-        code: ctmbstr,
-        args: *mut __va_list_tag,
-    ) -> Bool,
->;
-extern "C" {
-    pub fn tidySetReportFilter(tdoc: TidyDoc, filtCallback: TidyReportFilter) -> Bool;
-}
-extern "C" {
-    pub fn tidySetReportFilter2(tdoc: TidyDoc, filtCallback: TidyReportFilter2) -> Bool;
-}
-extern "C" {
-    pub fn tidySetReportFilter3(tdoc: TidyDoc, filtCallback: TidyReportFilter3) -> Bool;
-}
-extern "C" {
-    pub fn tidySetErrorFile(tdoc: TidyDoc, errfilnam: ctmbstr) -> *mut FILE;
-}
-extern "C" {
-    pub fn tidySetErrorBuffer(tdoc: TidyDoc, errbuf: *mut TidyBuffer) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySetErrorSink(tdoc: TidyDoc, sink: *mut TidyOutputSink) -> ::std::os::raw::c_int;
-}
-pub type TidyPPProgress = ::std::option::Option<
-    unsafe extern "C" fn(tdoc: TidyDoc, line: uint, col: uint, destLine: uint),
->;
-extern "C" {
-    pub fn tidySetPrettyPrinterCallback(tdoc: TidyDoc, callback: TidyPPProgress) -> Bool;
-}
-extern "C" {
-    pub fn tidyParseFile(tdoc: TidyDoc, filename: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyParseStdin(tdoc: TidyDoc) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyParseString(tdoc: TidyDoc, content: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyParseBuffer(tdoc: TidyDoc, buf: *mut TidyBuffer) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyParseSource(tdoc: TidyDoc, source: *mut TidyInputSource) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyCleanAndRepair(tdoc: TidyDoc) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyRunDiagnostics(tdoc: TidyDoc) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyReportDoctype(tdoc: TidyDoc) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySaveFile(tdoc: TidyDoc, filename: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySaveStdout(tdoc: TidyDoc) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySaveBuffer(tdoc: TidyDoc, buf: *mut TidyBuffer) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySaveString(
-        tdoc: TidyDoc,
-        buffer: tmbstr,
-        buflen: *mut uint,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidySaveSink(tdoc: TidyDoc, sink: *mut TidyOutputSink) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyOptSaveFile(tdoc: TidyDoc, cfgfil: ctmbstr) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn tidyOptSaveSink(tdoc: TidyDoc, sink: *mut TidyOutputSink) -> ::std::os::raw::c_int;
-}
-extern "C" {
+    #[doc = " Write more complete information about errors to current error sink."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
     pub fn tidyErrorSummary(tdoc: TidyDoc);
 }
 extern "C" {
+    #[doc = " Write more general information about markup to current error sink."]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
     pub fn tidyGeneralInfo(tdoc: TidyDoc);
 }
 extern "C" {
+    #[doc = " Load an ASCII Tidy configuration file and set the configuration per its"]
+    #[doc = " contents. Reports config option errors, which can be filtered."]
+    #[doc = " @result Returns 0 upon success, or any other value if there was an option error."]
+    pub fn tidyLoadConfig(tdoc: TidyDoc, configFile: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Load a Tidy configuration file with the specified character encoding, and"]
+    #[doc = " set the configuration per its contents.  Reports config option errors, which can be filtered."]
+    #[doc = " @result Returns 0 upon success, or any other value if there was an option error."]
+    pub fn tidyLoadConfigEnc(tdoc: TidyDoc, configFile: ctmbstr, charenc: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Determine whether or not a particular file exists. On Unix systems, the use"]
+    #[doc = " of the tilde to represent the user's home directory is supported."]
+    #[doc = " @result Returns `yes` or `no`, indicating whether or not the file exists."]
+    pub fn tidyFileExists(tdoc: TidyDoc, filename: ctmbstr) -> Bool;
+}
+extern "C" {
+    #[doc = " Set the input/output character encoding for parsing markup. Valid values"]
+    #[doc = " include `ascii`, `latin1`, `raw`, `utf8`, `iso2022`, `mac`, `win1252`,"]
+    #[doc = " `utf16le`, `utf16be`, `utf16`, `big5`, and `shiftjis`. These values are not"]
+    #[doc = " case sensitive."]
+    #[doc = " @note This is the same as using TidySetInCharEncoding() and"]
+    #[doc = "       TidySetOutCharEncoding() to set the same value."]
+    #[doc = " @result Returns 0 upon success, or a system standard error number `EINVAL`."]
+    pub fn tidySetCharEncoding(tdoc: TidyDoc, encnam: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Set the input encoding for parsing markup.  Valid values include `ascii`,"]
+    #[doc = " `latin1`, `raw`, `utf8`, `iso2022`, `mac`, `win1252`, `utf16le`, `utf16be`,"]
+    #[doc = " `utf16`, `big5`, and `shiftjis`. These values are not case sensitive."]
+    #[doc = " @result Returns 0 upon success, or a system standard error number `EINVAL`."]
+    pub fn tidySetInCharEncoding(tdoc: TidyDoc, encnam: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Set the input encoding for writing markup.  Valid values include `ascii`,"]
+    #[doc = " `latin1`, `raw`, `utf8`, `iso2022`, `mac`, `win1252`, `utf16le`, `utf16be`,"]
+    #[doc = " `utf16`, `big5`, and `shiftjis`. These values are not case sensitive."]
+    #[doc = " @result Returns 0 upon success, or a system standard error number `EINVAL`."]
+    pub fn tidySetOutCharEncoding(tdoc: TidyDoc, encnam: ctmbstr) -> ::std::os::raw::c_int;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetOptionCallback()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " Note that this is deprecated and you should instead migrate to"]
+#[doc = " tidySetConfigCallback()."]
+#[doc = " @param option The option name that was provided."]
+#[doc = " @param value The option value that was provided"]
+#[doc = " @return Your callback function will return `yes` if it handles the provided"]
+#[doc = "         option, or `no` if it does not. In the latter case, Tidy will issue"]
+#[doc = "         an unknown configuration option error."]
+pub type TidyOptCallback = ::std::option::Option<unsafe extern "C" fn(option: ctmbstr, value: ctmbstr) -> Bool>;
+extern "C" {
+    #[doc = " Applications using TidyLib may want to augment command-line and"]
+    #[doc = " configuration file options. Setting this callback allows a LibTidy"]
+    #[doc = " application developer to examine command-line and configuration file options"]
+    #[doc = " after LibTidy has examined them and failed to recognize them."]
+    #[doc = " Note that this is deprecated and you should instead migrate to"]
+    #[doc = " tidySetConfigCallback()."]
+    #[doc = " @result Returns `yes` upon success."]
+    pub fn tidySetOptionCallback(tdoc: TidyDoc, pOptCallback: TidyOptCallback) -> Bool;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetConfigCallback()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " @param tdoc The document instance for which the callback was invoked."]
+#[doc = " @param option The option name that was provided."]
+#[doc = " @param value The option value that was provided"]
+#[doc = " @return Your callback function will return `yes` if it handles the provided"]
+#[doc = "         option, or `no` if it does not. In the latter case, Tidy will issue"]
+#[doc = "         an unknown configuration option error."]
+pub type TidyConfigCallback = ::std::option::Option<unsafe extern "C" fn(tdoc: TidyDoc, option: ctmbstr, value: ctmbstr) -> Bool>;
+extern "C" {
+    #[doc = " Applications using TidyLib may want to augment command-line and"]
+    #[doc = " configuration file options. Setting this callback allows a LibTidy"]
+    #[doc = " application developer to examine command-line and configuration file options"]
+    #[doc = " after LibTidy has examined them and failed to recognize them."]
+    #[doc = " @result Returns `yes` upon success."]
+    pub fn tidySetConfigCallback(tdoc: TidyDoc, pConfigCallback: TidyConfigCallback) -> Bool;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetConfigChangeCallback()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " @param tdoc The document instance for which the callback was invoked."]
+#[doc = " @param option The option that will be changed."]
+pub type TidyConfigChangeCallback = ::std::option::Option<unsafe extern "C" fn(tdoc: TidyDoc, option: TidyOption)>;
+extern "C" {
+    #[doc = " Applications using TidyLib may want to be informed when changes to options"]
+    #[doc = " are made. Temporary changes made internally by Tidy are not reported, but"]
+    #[doc = " permanent changes made by Tidy (such as indent-spaces or output-encoding)"]
+    #[doc = " will be reported."]
+    #[doc = " @note This callback is not currently implemented."]
+    #[doc = " @result Returns `yes` upon success."]
+    pub fn tidySetConfigChangeCallback(tdoc: TidyDoc, pCallback: TidyConfigChangeCallback) -> Bool;
+}
+extern "C" {
+    #[doc = " Get ID of given Option"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result The TidyOptionId of the given option."]
+    pub fn tidyOptGetId(opt: TidyOption) -> TidyOptionId;
+}
+extern "C" {
+    #[doc = " Returns the TidyOptionId (enum value) by providing the name of a Tidy"]
+    #[doc = " configuration option."]
+    #[doc = " @param optnam The name of the option ID to retrieve."]
+    #[doc = " @result The TidyOptionId of the given `optname`."]
+    pub fn tidyOptGetIdForName(optnam: ctmbstr) -> TidyOptionId;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of TidyOption instances, which allows you"]
+    #[doc = " to iterate through all of the available options. In order to iterate through"]
+    #[doc = " the available options, initiate the iterator with this function, and then"]
+    #[doc = " use tidyGetNextOption() to retrieve the first and subsequent options. For"]
+    #[doc = " example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itOpt = tidyGetOptionList( tdoc );"]
+    #[doc = "   while ( itOpt ) {"]
+    #[doc = "     TidyOption opt = tidyGetNextOption( tdoc, &itOpt );"]
+    #[doc = "     // Use other API to query or set set option values"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyGetOptionList(tdoc: TidyDoc) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyGetOptionList(), returns"]
+    #[doc = " the instance of the next TidyOption."]
+    #[doc = " @note This function will return internal-only option types including"]
+    #[doc = "       `TidyInternalCategory`; you should *never* use these. Always ensure"]
+    #[doc = "       that you use `tidyOptGetCategory()` before assuming that an option"]
+    #[doc = "       is okay to use in your application."]
+    #[doc = " @result An instance of TidyOption."]
+    pub fn tidyGetNextOption(tdoc: TidyDoc, pos: *mut TidyIterator) -> TidyOption;
+}
+extern "C" {
+    #[doc = " Retrieves an instance of TidyOption given a valid TidyOptionId."]
+    #[doc = " @result An instance of TidyOption matching the provided TidyOptionId."]
+    pub fn tidyGetOption(tdoc: TidyDoc, optId: TidyOptionId) -> TidyOption;
+}
+extern "C" {
+    #[doc = " Returns an instance of TidyOption by providing the name of a Tidy"]
+    #[doc = " configuration option."]
+    #[doc = " @result The TidyOption of the given `optname`."]
+    pub fn tidyGetOptionByName(tdoc: TidyDoc, optnam: ctmbstr) -> TidyOption;
+}
+extern "C" {
+    #[doc = " Get name of given Option"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result The name of the given option."]
+    pub fn tidyOptGetName(opt: TidyOption) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get datatype of given Option"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result The TidyOptionType of the given option."]
+    pub fn tidyOptGetType(opt: TidyOption) -> TidyOptionType;
+}
+extern "C" {
+    #[doc = " Indicates that an option takes a list of items."]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result A bool indicating whether or not the option accepts a list."]
+    pub fn tidyOptionIsList(opt: TidyOption) -> Bool;
+}
+extern "C" {
+    #[doc = " Is Option read-only? Some options (mainly internal use only options) are"]
+    #[doc = " read-only."]
+    #[doc = " @deprecated This is no longer a valid test for the public API; instead"]
+    #[doc = "   you should test an option's availability using `tidyOptGetCategory()`"]
+    #[doc = "   against `TidyInternalCategory`. This API will be removed!"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result Returns `yes` or `no` depending on whether or not the specified"]
+    #[doc = "         option is read-only."]
+    pub fn tidyOptIsReadOnly(opt: TidyOption) -> Bool;
+}
+extern "C" {
+    #[doc = " Get category of given Option"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result The TidyConfigCategory of the specified option."]
+    pub fn tidyOptGetCategory(opt: TidyOption) -> TidyConfigCategory;
+}
+extern "C" {
+    #[doc = " Get default value of given Option as a string"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result A string indicating the default value of the specified option."]
+    pub fn tidyOptGetDefault(opt: TidyOption) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get default value of given Option as an unsigned integer"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result An unsigned integer indicating the default value of the specified"]
+    #[doc = "         option."]
+    pub fn tidyOptGetDefaultInt(opt: TidyOption) -> ulong;
+}
+extern "C" {
+    #[doc = " Get default value of given Option as a Boolean value"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result A boolean indicating the default value of the specified option."]
+    pub fn tidyOptGetDefaultBool(opt: TidyOption) -> Bool;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of TidyOption pick-list values, which"]
+    #[doc = " allows you iterate through all of the available option values. In order to"]
+    #[doc = " iterate through the available values, initiate the iterator with this"]
+    #[doc = " function, and then use tidyOptGetNextPick() to retrieve the first and"]
+    #[doc = " subsequent option values. For example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itOpt = tidyOptGetPickList( opt );"]
+    #[doc = "   while ( itOpt ) {"]
+    #[doc = "     printf(\"%s\", tidyOptGetNextPick( opt, &itOpt ));"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @param opt An instance of a TidyOption to query."]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyOptGetPickList(opt: TidyOption) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyOptGetPickList(), returns a"]
+    #[doc = " string representing a possible option value."]
+    #[doc = " @result A string containing the next pick-list option value."]
+    pub fn tidyOptGetNextPick(opt: TidyOption, pos: *mut TidyIterator) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the current value of the option ID for the given document."]
+    #[doc = " @remark The optId *must* have a @ref TidyOptionType of @ref TidyString!"]
+    pub fn tidyOptGetValue(tdoc: TidyDoc, optId: TidyOptionId) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Set the option value as a string."]
+    #[doc = " @remark The optId *must* have a @ref TidyOptionType of @ref TidyString!"]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptSetValue(tdoc: TidyDoc, optId: TidyOptionId, val: ctmbstr) -> Bool;
+}
+extern "C" {
+    #[doc = " Set named option value as a string, regardless of the @ref TidyOptionType."]
+    #[doc = " @remark This is good setter if you are unsure of the type."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptParseValue(tdoc: TidyDoc, optnam: ctmbstr, val: ctmbstr) -> Bool;
+}
+extern "C" {
+    #[doc = " Get current option value as an integer."]
+    #[doc = " @result Returns the integer value of the specified option."]
+    pub fn tidyOptGetInt(tdoc: TidyDoc, optId: TidyOptionId) -> ulong;
+}
+extern "C" {
+    #[doc = " Set option value as an integer."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptSetInt(tdoc: TidyDoc, optId: TidyOptionId, val: ulong) -> Bool;
+}
+extern "C" {
+    #[doc = " Get current option value as a Boolean flag."]
+    #[doc = " @result Returns a bool indicating the value."]
+    pub fn tidyOptGetBool(tdoc: TidyDoc, optId: TidyOptionId) -> Bool;
+}
+extern "C" {
+    #[doc = " Set option value as a Boolean flag."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptSetBool(tdoc: TidyDoc, optId: TidyOptionId, val: Bool) -> Bool;
+}
+extern "C" {
+    #[doc = " Reset option to default value by ID."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptResetToDefault(tdoc: TidyDoc, opt: TidyOptionId) -> Bool;
+}
+extern "C" {
+    #[doc = " Reset all options to their default values."]
+    #[doc = " @param tdoc The tidy document for which to reset all values."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptResetAllToDefault(tdoc: TidyDoc) -> Bool;
+}
+extern "C" {
+    #[doc = " Take a snapshot of current config settings. These settings are stored"]
+    #[doc = " within the tidy document. Note, however, that snapshots do not reliably"]
+    #[doc = " survive the tidyParseXXX() process, as Tidy uses the snapshot mechanism"]
+    #[doc = " in order to store the current configuration right at the beginning of the"]
+    #[doc = " parsing process."]
+    #[doc = " @param tdoc The tidy document for which to take a snapshot."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptSnapshot(tdoc: TidyDoc) -> Bool;
+}
+extern "C" {
+    #[doc = " Apply a snapshot of config settings to a document."]
+    #[doc = " @param tdoc The tidy document for which to apply a snapshot."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptResetToSnapshot(tdoc: TidyDoc) -> Bool;
+}
+extern "C" {
+    #[doc = " Any settings different than default?"]
+    #[doc = " @param tdoc The tidy document to check."]
+    #[doc = " @result Returns a bool indicating whether or not a difference exists."]
+    pub fn tidyOptDiffThanDefault(tdoc: TidyDoc) -> Bool;
+}
+extern "C" {
+    #[doc = " Any settings different than snapshot?"]
+    #[doc = " @param tdoc The tidy document to check."]
+    #[doc = " @result Returns a bool indicating whether or not a difference exists."]
+    pub fn tidyOptDiffThanSnapshot(tdoc: TidyDoc) -> Bool;
+}
+extern "C" {
+    #[doc = " Copy current configuration settings from one document to another. Note"]
+    #[doc = " that the destination document's existing settings will be stored as that"]
+    #[doc = " document's snapshot prior to having its option values overwritten by the"]
+    #[doc = " source document's settings."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyOptCopyConfig(tdocTo: TidyDoc, tdocFrom: TidyDoc) -> Bool;
+}
+extern "C" {
+    #[doc = " Get character encoding name. Used with @ref TidyCharEncoding,"]
+    #[doc = " @ref TidyOutCharEncoding, and @ref TidyInCharEncoding."]
+    #[doc = " @result The encoding name as a string for the specified option."]
+    pub fn tidyOptGetEncName(tdoc: TidyDoc, optId: TidyOptionId) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the current pick list value for the option ID, which can be useful for"]
+    #[doc = " enum types."]
+    #[doc = " @result Returns a string indicating the current value of the specified"]
+    #[doc = "         option."]
+    pub fn tidyOptGetCurrPick(tdoc: TidyDoc, optId: TidyOptionId) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of user-declared tags, including autonomous"]
+    #[doc = " custom tags detected in the document if @ref TidyUseCustomTags is not set to"]
+    #[doc = " **no**. This iterator allows you to iterate through all of the custom tags."]
+    #[doc = " In order to iterate through the tags, initiate the iterator with this"]
+    #[doc = " function, and then use tidyOptGetNextDeclTag() to retrieve the first and"]
+    #[doc = " subsequent tags. For example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itTag = tidyOptGetDeclTagList( tdoc );"]
+    #[doc = "   while ( itTag ) {"]
+    #[doc = "     printf(\"%s\", tidyOptGetNextDeclTag( tdoc, TidyBlockTags, &itTag ));"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyOptGetDeclTagList(tdoc: TidyDoc) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyOptGetDeclTagList(), returns a"]
+    #[doc = " string representing a user-declared or autonomous custom tag."]
+    #[doc = " @remark Specifying optId limits the scope of the tags to one of"]
+    #[doc = "         @ref TidyInlineTags, @ref TidyBlockTags, @ref TidyEmptyTags, or"]
+    #[doc = "         @ref TidyPreTags. Note that autonomous custom tags (if used) are"]
+    #[doc = "         added to one of these option types, depending on the value of"]
+    #[doc = "         @ref TidyUseCustomTags."]
+    #[doc = " @result A string containing the next tag."]
+    pub fn tidyOptGetNextDeclTag(tdoc: TidyDoc, optId: TidyOptionId, iter: *mut TidyIterator) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of priority attributes. This iterator"]
+    #[doc = " allows you to iterate through all of the priority attributes defined with"]
+    #[doc = " the `priority-attributes` configuration option. In order to iterate through"]
+    #[doc = " the attributes, initiate the iterator with this function, and then use"]
+    #[doc = " tidyOptGetNextPriorityAttr() to retrieve the first and subsequent attributes."]
+    #[doc = " For example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itAttr = tidyOptGetPriorityAttrList( tdoc );"]
+    #[doc = "   while ( itAttr ) {"]
+    #[doc = "     printf(\"%s\", tidyOptGetNextPriorityAttr( tdoc, &itAttr ));"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyOptGetPriorityAttrList(tdoc: TidyDoc) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyOptGetPriorityAttrList(),"]
+    #[doc = " returns a string representing a priority attribute."]
+    #[doc = " @result A string containing the next tag."]
+    pub fn tidyOptGetNextPriorityAttr(tdoc: TidyDoc, iter: *mut TidyIterator) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of muted messages. This iterator allows"]
+    #[doc = " you to iterate through all of the priority attributes defined with the"]
+    #[doc = " `mute` configuration option. In order to iterate through the list, initiate"]
+    #[doc = " with this function, and then use tidyOptGetNextMutedMessage() to retrieve"]
+    #[doc = " the first and subsequent attributes."]
+    #[doc = " For example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itAttr = tidyOptGetMutedMessageList( tdoc );"]
+    #[doc = "   while ( itAttr ) {"]
+    #[doc = "     printf(\"%s\", tidyOptGetNextMutedMessage( tdoc, &itAttr ));"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @param tdoc An instance of a TidyDoc to query."]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyOptGetMutedMessageList(tdoc: TidyDoc) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyOptGetMutedMessageList(),"]
+    #[doc = " returns a string representing a muted message."]
+    #[doc = " @result A string containing the next tag."]
+    pub fn tidyOptGetNextMutedMessage(tdoc: TidyDoc, iter: *mut TidyIterator) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the description of the specified option."]
+    #[doc = " @result Returns a string containing a description of the given option."]
+    pub fn tidyOptGetDoc(tdoc: TidyDoc, opt: TidyOption) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of options related to a given option. This"]
+    #[doc = " iterator allows you to iterate through all of the related options, if any."]
+    #[doc = " In order to iterate through the options, initiate the iterator with this"]
+    #[doc = " function, and then use tidyOptGetNextDocLinks() to retrieve the first and"]
+    #[doc = " subsequent options. For example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itOpt = tidyOptGetDocLinksList( tdoc, TidyJoinStyles );"]
+    #[doc = "   while ( itOpt ) {"]
+    #[doc = "     TidyOption my_option = tidyOptGetNextDocLinks( tdoc, &itOpt );"]
+    #[doc = "     // do something with my_option"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyOptGetDocLinksList(tdoc: TidyDoc, opt: TidyOption) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyOptGetDocLinksList(), returns"]
+    #[doc = " a TidyOption instance."]
+    #[doc = " @result Returns in instance of TidyOption."]
+    pub fn tidyOptGetNextDocLinks(tdoc: TidyDoc, pos: *mut TidyIterator) -> TidyOption;
+}
+pub type TidyBuffer = _TidyBuffer;
+#[doc = " Input Callback: get next byte of input"]
+pub type TidyGetByteFunc = ::std::option::Option<unsafe extern "C" fn(sourceData: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_int>;
+#[doc = " Input Callback: unget a byte of input"]
+pub type TidyUngetByteFunc = ::std::option::Option<unsafe extern "C" fn(sourceData: *mut ::std::os::raw::c_void, bt: byte)>;
+#[doc = " Input Callback: is end of input?"]
+pub type TidyEOFFunc = ::std::option::Option<unsafe extern "C" fn(sourceData: *mut ::std::os::raw::c_void) -> Bool>;
+#[doc = " This type defines an input source capable of delivering raw bytes of input."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _TidyInputSource {
+    #[doc = "< Input context. Passed to callbacks."]
+    pub sourceData: *mut ::std::os::raw::c_void,
+    #[doc = "< Pointer to \"get byte\" callback."]
+    pub getByte: TidyGetByteFunc,
+    #[doc = "< Pointer to \"unget\" callback."]
+    pub ungetByte: TidyUngetByteFunc,
+    #[doc = "< Pointer to \"eof\" callback."]
+    pub eof: TidyEOFFunc,
+}
+#[doc = " This type defines an input source capable of delivering raw bytes of input."]
+pub type TidyInputSource = _TidyInputSource;
+extern "C" {
+    #[doc = " Facilitates user defined source by providing an entry point to marshal"]
+    #[doc = " pointers-to-functions. This is needed by .NET, and possibly other language"]
+    #[doc = " bindings."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyInitSource(source: *mut TidyInputSource, srcData: *mut ::std::os::raw::c_void, gbFunc: TidyGetByteFunc, ugbFunc: TidyUngetByteFunc, endFunc: TidyEOFFunc) -> Bool;
+}
+extern "C" {
+    #[doc = " Helper: get next byte from input source."]
+    #[doc = " @param source A pointer to your input source."]
+    #[doc = " @result Returns a byte as an unsigned integer."]
+    pub fn tidyGetByte(source: *mut TidyInputSource) -> uint;
+}
+extern "C" {
+    #[doc = " Helper: unget byte back to input source."]
+    pub fn tidyUngetByte(source: *mut TidyInputSource, byteValue: uint);
+}
+extern "C" {
+    #[doc = " Helper: check if input source at end."]
+    #[doc = " @param source The input source."]
+    #[doc = " @result Returns a bool indicating whether or not the source is at EOF."]
+    pub fn tidyIsEOF(source: *mut TidyInputSource) -> Bool;
+}
+#[doc = " Output callback: send a byte to output"]
+pub type TidyPutByteFunc = ::std::option::Option<unsafe extern "C" fn(sinkData: *mut ::std::os::raw::c_void, bt: byte)>;
+#[doc = " This type defines an output destination capable of accepting raw bytes"]
+#[doc = " of output"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _TidyOutputSink {
+    #[doc = "< Output context. Passed to callbacks."]
+    pub sinkData: *mut ::std::os::raw::c_void,
+    #[doc = "< Pointer to \"put byte\" callback"]
+    pub putByte: TidyPutByteFunc,
+}
+#[doc = " This type defines an output destination capable of accepting raw bytes"]
+#[doc = " of output"]
+pub type TidyOutputSink = _TidyOutputSink;
+extern "C" {
+    #[doc = " Facilitates user defined sinks by providing an entry point to marshal"]
+    #[doc = " pointers-to-functions. This is needed by .NET, and possibly other language"]
+    #[doc = " bindings."]
+    #[doc = " @result Returns a bool indicating success or failure."]
+    pub fn tidyInitSink(sink: *mut TidyOutputSink, snkData: *mut ::std::os::raw::c_void, pbFunc: TidyPutByteFunc) -> Bool;
+}
+extern "C" {
+    #[doc = " Helper: send a byte to output."]
+    pub fn tidyPutByte(sink: *mut TidyOutputSink, byteValue: uint);
+}
+extern "C" {
+    #[doc = " Set the file path to use for reports when `TidyEmacs` is being used. This"]
+    #[doc = " function provides a proper interface for using the hidden, internal-only"]
+    #[doc = " `TidyEmacsFile` configuration option."]
+    pub fn tidySetEmacsFile(tdoc: TidyDoc, filePath: ctmbstr);
+}
+extern "C" {
+    #[doc = " Get the file path to use for reports when `TidyEmacs` is being used. This"]
+    #[doc = " function provides a proper interface for using the hidden, internal-only"]
+    #[doc = " `TidyEmacsFile` configuration option."]
+    #[doc = " @param tdoc The tidy document for which you want to fetch the file path."]
+    #[doc = " @result Returns a string indicating the file path."]
+    pub fn tidyGetEmacsFile(tdoc: TidyDoc) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Set error sink to named file."]
+    #[doc = " @result Returns a file handle."]
+    pub fn tidySetErrorFile(tdoc: TidyDoc, errfilnam: ctmbstr) -> *mut FILE;
+}
+extern "C" {
+    #[doc = " Set error sink to given buffer."]
+    #[doc = " @result Returns 0 upon success or a standard error number."]
+    pub fn tidySetErrorBuffer(tdoc: TidyDoc, errbuf: *mut TidyBuffer) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Set error sink to given generic sink."]
+    #[doc = " @result Returns 0 upon success or a standard error number."]
+    pub fn tidySetErrorSink(tdoc: TidyDoc, sink: *mut TidyOutputSink) -> ::std::os::raw::c_int;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetReportFilter()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " @param tdoc Indicates the tidy document the message comes from."]
+#[doc = " @param lvl Specifies the TidyReportLevel of the message."]
+#[doc = " @param line Indicates the line number in the source document the message applies to."]
+#[doc = " @param col Indicates the column in the source document the message applies to."]
+#[doc = " @param mssg Specifies the complete message as Tidy would emit it."]
+#[doc = " @return Your callback function will return `yes` if Tidy should include the"]
+#[doc = "         report in its own output sink, or `no` if Tidy should suppress it."]
+pub type TidyReportFilter = ::std::option::Option<unsafe extern "C" fn(tdoc: TidyDoc, lvl: TidyReportLevel, line: uint, col: uint, mssg: ctmbstr) -> Bool>;
+extern "C" {
+    #[doc = " This function informs Tidy to use the specified callback to send reports."]
+    pub fn tidySetReportFilter(tdoc: TidyDoc, filtCallback: TidyReportFilter) -> Bool;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetReportCallback()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " @param tdoc Indicates the tidy document the message comes from."]
+#[doc = " @param lvl Specifies the TidyReportLevel of the message."]
+#[doc = " @param line Indicates the line number in the source document the message applies to."]
+#[doc = " @param col Indicates the column in the source document the message applies to."]
+#[doc = " @param code Specifies the message code representing the message. Note that"]
+#[doc = "        this code is a string value that the API promises to hold constant,"]
+#[doc = "        as opposed to an enum value that can change at any time. Although"]
+#[doc = "        this is intended so that you can look up your own application's"]
+#[doc = "        strings, you can retrieve Tidy's format string with this code by"]
+#[doc = "        using tidyErrorCodeFromKey() and then the tidyLocalizedString()"]
+#[doc = "        family of functions."]
+#[doc = " @param args Is a `va_list` of arguments used to fill Tidy's message format string."]
+#[doc = " @return Your callback function will return `yes` if Tidy should include the"]
+#[doc = "         report in its own output sink, or `no` if Tidy should suppress it."]
+pub type TidyReportCallback =
+    ::std::option::Option<unsafe extern "C" fn(tdoc: TidyDoc, lvl: TidyReportLevel, line: uint, col: uint, code: ctmbstr, args: *mut __va_list_tag) -> Bool>;
+extern "C" {
+    #[doc = " This function informs Tidy to use the specified callback to send reports."]
+    pub fn tidySetReportCallback(tdoc: TidyDoc, filtCallback: TidyReportCallback) -> Bool;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetMessageCallback()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " @param tmessage An opaque type used as a token against which other API"]
+#[doc = "        calls can be made."]
+#[doc = " @return Your callback function will return `yes` if Tidy should include the"]
+#[doc = "         report in its own output sink, or `no` if Tidy should suppress it."]
+pub type TidyMessageCallback = ::std::option::Option<unsafe extern "C" fn(tmessage: TidyMessage) -> Bool>;
+extern "C" {
+    #[doc = " This function informs Tidy to use the specified callback to send reports."]
+    pub fn tidySetMessageCallback(tdoc: TidyDoc, filtCallback: TidyMessageCallback) -> Bool;
+}
+extern "C" {
+    #[doc = " Get the tidy document this message comes from."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the TidyDoc that generated the message."]
+    pub fn tidyGetMessageDoc(tmessage: TidyMessage) -> TidyDoc;
+}
+extern "C" {
+    #[doc = " Get the message code."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns a code representing the message. This code can be used"]
+    #[doc = "         directly with the localized strings API; however we never make"]
+    #[doc = "         any guarantees about the value of these codes. For code stability"]
+    #[doc = "         don't store this value in your own application. Instead use the"]
+    #[doc = "         enum field or use the message key string value."]
+    pub fn tidyGetMessageCode(tmessage: TidyMessage) -> uint;
+}
+extern "C" {
+    #[doc = " Get the message key string."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns a string representing the message. This string is intended"]
+    #[doc = "         to be stable by the LibTidy API, and is suitable for use as a key"]
+    #[doc = "         in your own applications."]
+    pub fn tidyGetMessageKey(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the line number the message applies to."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the line number, if any, that generated the message."]
+    pub fn tidyGetMessageLine(tmessage: TidyMessage) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Get the column the message applies to."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the column number, if any, that generated the message."]
+    pub fn tidyGetMessageColumn(tmessage: TidyMessage) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Get the TidyReportLevel of the message."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns a TidyReportLevel indicating the severity or status of the"]
+    #[doc = "         message."]
+    pub fn tidyGetMessageLevel(tmessage: TidyMessage) -> TidyReportLevel;
+}
+extern "C" {
+    #[doc = " Get the muted status of the message, that is, whether or not the"]
+    #[doc = " current configuration indicated that this message should be muted."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns a Bool indicating that the config indicates muting this"]
+    #[doc = "         message."]
+    pub fn tidyGetMessageIsMuted(tmessage: TidyMessage) -> Bool;
+}
+extern "C" {
+    #[doc = " Get the default format string, which is the format string for the message"]
+    #[doc = " in Tidy's default localization (en_us)."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the default localization format string of the message."]
+    pub fn tidyGetMessageFormatDefault(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the localized format string. If a localized version of the format string"]
+    #[doc = " doesn't exist, then the default version will be returned."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the localized format string of the message."]
+    pub fn tidyGetMessageFormat(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the message with the format string already completed, in Tidy's"]
+    #[doc = " default localization."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the message in the default localization."]
+    pub fn tidyGetMessageDefault(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the message with the format string already completed, in Tidy's"]
+    #[doc = " current localization."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the message in the current localization."]
+    pub fn tidyGetMessage(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the position part part of the message in the default language."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the positional part of a string as Tidy would display it"]
+    #[doc = "         in the console application."]
+    pub fn tidyGetMessagePosDefault(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the position part part of the message in the current language."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the positional part of a string as Tidy would display it"]
+    #[doc = "         in the console application."]
+    pub fn tidyGetMessagePos(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the prefix part of a message in the default language."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the message prefix part of a string as Tidy would display"]
+    #[doc = "         it in the console application."]
+    pub fn tidyGetMessagePrefixDefault(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the prefix part of a message in the current language."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the message prefix part of a string as Tidy would display"]
+    #[doc = "         it in the console application."]
+    pub fn tidyGetMessagePrefix(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the complete message as Tidy would emit it in the default localization."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the complete message just as Tidy would display it on the"]
+    #[doc = "         console."]
+    pub fn tidyGetMessageOutputDefault(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Get the complete message as Tidy would emit it in the current localization."]
+    #[doc = " @param tmessage Specify the message that you are querying."]
+    #[doc = " @result Returns the complete message just as Tidy would display it on the"]
+    #[doc = "         console."]
+    pub fn tidyGetMessageOutput(tmessage: TidyMessage) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Initiates an iterator for a list of arguments related to a given message."]
+    #[doc = " This iterator allows you to iterate through all of the arguments, if any."]
+    #[doc = " In order to iterate through the arguments, initiate the iterator with this"]
+    #[doc = " function, and then use tidyGetNextMessageArgument() to retrieve the first"]
+    #[doc = " and subsequent arguments. For example:"]
+    #[doc = " @code{.c}"]
+    #[doc = "   TidyIterator itArg = tidyGetMessageArguments( tmessage );"]
+    #[doc = "   while ( itArg ) {"]
+    #[doc = "     TidyMessageArgument my_arg = tidyGetNextMessageArgument( tmessage, &itArg );"]
+    #[doc = "     // do something with my_arg, such as inspect its value or format"]
+    #[doc = "   }"]
+    #[doc = " @endcode"]
+    #[doc = " @param tmessage The message about whose arguments you wish to query."]
+    #[doc = " @result Returns a TidyIterator, which is a token used to represent the"]
+    #[doc = "         current position in a list within LibTidy."]
+    pub fn tidyGetMessageArguments(tmessage: TidyMessage) -> TidyIterator;
+}
+extern "C" {
+    #[doc = " Given a valid TidyIterator initiated with tidyGetMessageArguments(), returns"]
+    #[doc = " an instance of the opaque type TidyMessageArgument, which serves as a token"]
+    #[doc = " against which the remaining argument API functions may be used to query"]
+    #[doc = " information."]
+    #[doc = " @result Returns an instance of TidyMessageArgument."]
+    pub fn tidyGetNextMessageArgument(tmessage: TidyMessage, iter: *mut TidyIterator) -> TidyMessageArgument;
+}
+extern "C" {
+    #[doc = " Returns the `TidyFormatParameterType` of the given message argument."]
+    #[doc = " @result Returns the type of parameter of type TidyFormatParameterType."]
+    pub fn tidyGetArgType(tmessage: TidyMessage, arg: *mut TidyMessageArgument) -> TidyFormatParameterType;
+}
+extern "C" {
+    #[doc = " Returns the format specifier of the given message argument. The memory for"]
+    #[doc = " this string is cleared upon termination of the callback, so do be sure to"]
+    #[doc = " make your own copy."]
+    #[doc = " @result Returns the format specifier string of the given argument."]
+    pub fn tidyGetArgFormat(tmessage: TidyMessage, arg: *mut TidyMessageArgument) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Returns the string value of the given message argument. An assertion"]
+    #[doc = " will be generated if the argument type is not a string."]
+    #[doc = " @result Returns the string value of the given argument."]
+    pub fn tidyGetArgValueString(tmessage: TidyMessage, arg: *mut TidyMessageArgument) -> ctmbstr;
+}
+extern "C" {
+    #[doc = " Returns the unsigned integer value of the given message argument. An"]
+    #[doc = " assertion will be generated if the argument type is not an unsigned int."]
+    #[doc = " @result Returns the unsigned integer value of the given argument."]
+    pub fn tidyGetArgValueUInt(tmessage: TidyMessage, arg: *mut TidyMessageArgument) -> uint;
+}
+extern "C" {
+    #[doc = " Returns the integer value of the given message argument. An assertion"]
+    #[doc = " will be generated if the argument type is not an integer."]
+    #[doc = " @result Returns the integer value of the given argument."]
+    pub fn tidyGetArgValueInt(tmessage: TidyMessage, arg: *mut TidyMessageArgument) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = "  Returns the double value of the given message argument. An assertion"]
+    #[doc = "  will be generated if the argument type is not a double."]
+    #[doc = " @result Returns the double value of the given argument."]
+    pub fn tidyGetArgValueDouble(tmessage: TidyMessage, arg: *mut TidyMessageArgument) -> f64;
+}
+#[doc = " This typedef represents the required signature for your provided callback"]
+#[doc = " function should you wish to register one with tidySetMessageCallback()."]
+#[doc = " Your callback function will be provided with the following parameters."]
+#[doc = " @param tdoc Indicates the source tidy document."]
+#[doc = " @param line Indicates the line in the source document at this point in the process."]
+#[doc = " @param col Indicates the column in the source document at this point in the process."]
+#[doc = " @param destLine Indicates the line number in the output document at this point in the process."]
+pub type TidyPPProgress = ::std::option::Option<unsafe extern "C" fn(tdoc: TidyDoc, line: uint, col: uint, destLine: uint)>;
+extern "C" {
+    #[doc = " This function informs Tidy to use the specified callback for tracking the"]
+    #[doc = " pretty-printing process progress."]
+    pub fn tidySetPrettyPrinterCallback(tdoc: TidyDoc, callback: TidyPPProgress) -> Bool;
+}
+extern "C" {
+    #[doc = " Parse markup in named file."]
+    #[doc = " @result Returns the highest of `2` indicating that errors were present in"]
+    #[doc = "         the document, `1` indicating warnings, and `0` in the case of"]
+    #[doc = "         everything being okay."]
+    pub fn tidyParseFile(tdoc: TidyDoc, filename: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Parse markup from the standard input."]
+    #[doc = " @param tdoc The tidy document to use for parsing."]
+    #[doc = " @result Returns the highest of `2` indicating that errors were present in"]
+    #[doc = "         the document, `1` indicating warnings, and `0` in the case of"]
+    #[doc = "         everything being okay."]
+    pub fn tidyParseStdin(tdoc: TidyDoc) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Parse markup in given string. Note that the supplied string is of type"]
+    #[doc = " `ctmbstr` based on `char` and therefore doesn't support the use of"]
+    #[doc = " UTF-16 strings. Use `tidyParseBuffer()` if parsing multibyte strings."]
+    #[doc = " @result Returns the highest of `2` indicating that errors were present in"]
+    #[doc = "         the document, `1` indicating warnings, and `0` in the case of"]
+    #[doc = "         everything being okay."]
+    pub fn tidyParseString(tdoc: TidyDoc, content: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Parse markup in given buffer."]
+    #[doc = " @result Returns the highest of `2` indicating that errors were present in"]
+    #[doc = "         the document, `1` indicating warnings, and `0` in the case of"]
+    #[doc = "         everything being okay."]
+    pub fn tidyParseBuffer(tdoc: TidyDoc, buf: *mut TidyBuffer) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Parse markup in given generic input source."]
+    #[doc = " @result Returns the highest of `2` indicating that errors were present in"]
+    #[doc = "         the document, `1` indicating warnings, and `0` in the case of"]
+    #[doc = "         everything being okay."]
+    pub fn tidyParseSource(tdoc: TidyDoc, source: *mut TidyInputSource) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Execute configured cleanup and repair operations on parsed markup."]
+    #[doc = " @param tdoc The tidy document to use."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidyCleanAndRepair(tdoc: TidyDoc) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Reports the document type and diagnostic statistics on parsed and repaired"]
+    #[doc = " markup. You must call tidyCleanAndRepair() before using this function."]
+    #[doc = " @param tdoc The tidy document to use."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidyRunDiagnostics(tdoc: TidyDoc) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Reports the document type into the output sink."]
+    #[doc = " @param tdoc The tidy document to use."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidyReportDoctype(tdoc: TidyDoc) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save the tidy document to the named file."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidySaveFile(tdoc: TidyDoc, filename: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save the tidy document to standard output (FILE*)."]
+    #[doc = " @param tdoc The tidy document to save."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidySaveStdout(tdoc: TidyDoc) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save the tidy document to given TidyBuffer object."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidySaveBuffer(tdoc: TidyDoc, buf: *mut TidyBuffer) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save the tidy document to an application buffer. If TidyShowMarkup and the"]
+    #[doc = " document has no errors, or TidyForceOutput, then the current document (per"]
+    #[doc = " the current configuration) will be pretty printed to this application"]
+    #[doc = " buffer. The document byte length (not character length) will be placed into"]
+    #[doc = " *buflen. The document will not be null terminated. If the buffer is not big"]
+    #[doc = " enough, ENOMEM will be returned, else the actual document status."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidySaveString(tdoc: TidyDoc, buffer: tmbstr, buflen: *mut uint) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save to given generic output sink."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidySaveSink(tdoc: TidyDoc, sink: *mut TidyOutputSink) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save current settings to named file. Only writes non-default values."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidyOptSaveFile(tdoc: TidyDoc, cfgfil: ctmbstr) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Save current settings to given output sink. Only non-default values are"]
+    #[doc = " written."]
+    #[doc = " @result An integer representing the status."]
+    pub fn tidyOptSaveSink(tdoc: TidyDoc, sink: *mut TidyOutputSink) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Get the root node."]
+    #[doc = " @param tdoc The document to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetRoot(tdoc: TidyDoc) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Get the HTML node."]
+    #[doc = " @param tdoc The document to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetHtml(tdoc: TidyDoc) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Get the HEAD node."]
+    #[doc = " @param tdoc The document to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetHead(tdoc: TidyDoc) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Get the BODY node."]
+    #[doc = " @param tdoc The document to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetBody(tdoc: TidyDoc) -> TidyNode;
 }
 extern "C" {
-    pub fn tidyDiscardElement(tdoc: TidyDoc, tnod: TidyNode) -> TidyNode;
-}
-extern "C" {
+    #[doc = " Get the parent of the indicated node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetParent(tnod: TidyNode) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Get the child of the indicated node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetChild(tnod: TidyNode) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Get the next sibling node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetNext(tnod: TidyNode) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Get the previous sibling node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a tidy node."]
     pub fn tidyGetPrev(tnod: TidyNode) -> TidyNode;
 }
 extern "C" {
+    #[doc = " Remove the indicated node."]
+    #[doc = " @result Returns the next tidy node."]
+    pub fn tidyDiscardElement(tdoc: TidyDoc, tnod: TidyNode) -> TidyNode;
+}
+extern "C" {
+    #[doc = " Get the first attribute."]
+    #[doc = " @param tnod The node for which to get attributes."]
+    #[doc = " @result Returns an instance of TidyAttr."]
     pub fn tidyAttrFirst(tnod: TidyNode) -> TidyAttr;
 }
 extern "C" {
+    #[doc = " Get the next attribute."]
+    #[doc = " @param tattr The current attribute, so the next one can be returned."]
+    #[doc = " @result Returns and instance of TidyAttr."]
     pub fn tidyAttrNext(tattr: TidyAttr) -> TidyAttr;
 }
 extern "C" {
+    #[doc = " Get the name of a TidyAttr instance."]
+    #[doc = " @param tattr The tidy attribute to query."]
+    #[doc = " @result Returns a string indicating the name of the attribute."]
     pub fn tidyAttrName(tattr: TidyAttr) -> ctmbstr;
 }
 extern "C" {
+    #[doc = " Get the value of a TidyAttr instance."]
+    #[doc = " @param tattr The tidy attribute to query."]
+    #[doc = " @result Returns a string indicating the value of the attribute."]
     pub fn tidyAttrValue(tattr: TidyAttr) -> ctmbstr;
 }
 extern "C" {
+    #[doc = " Discard an attribute."]
     pub fn tidyAttrDiscard(itdoc: TidyDoc, tnod: TidyNode, tattr: TidyAttr);
 }
 extern "C" {
-    pub fn tidyNodeGetType(tnod: TidyNode) -> TidyNodeType;
-}
-extern "C" {
-    pub fn tidyNodeGetName(tnod: TidyNode) -> ctmbstr;
-}
-extern "C" {
-    pub fn tidyNodeIsText(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsProp(tdoc: TidyDoc, tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsHeader(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeHasText(tdoc: TidyDoc, tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeGetText(tdoc: TidyDoc, tnod: TidyNode, buf: *mut TidyBuffer) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeGetValue(tdoc: TidyDoc, tnod: TidyNode, buf: *mut TidyBuffer) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeGetId(tnod: TidyNode) -> TidyTagId;
-}
-extern "C" {
-    pub fn tidyNodeLine(tnod: TidyNode) -> uint;
-}
-extern "C" {
-    pub fn tidyNodeColumn(tnod: TidyNode) -> uint;
-}
-extern "C" {
-    pub fn tidyNodeIsHTML(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsHEAD(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsTITLE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBASE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsMETA(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBODY(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsFRAMESET(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsFRAME(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsIFRAME(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsNOFRAMES(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsHR(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsH1(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsH2(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsPRE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsLISTING(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsP(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsUL(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsOL(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsDL(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsDIR(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsLI(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsDT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsDD(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsTABLE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsCAPTION(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsTD(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsTH(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsTR(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsCOL(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsCOLGROUP(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBR(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsA(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsLINK(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsB(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsI(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSTRONG(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsEM(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBIG(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSMALL(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsPARAM(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsOPTION(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsOPTGROUP(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsIMG(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsMAP(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsAREA(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsNOBR(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsWBR(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsFONT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsLAYER(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSPACER(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsCENTER(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSTYLE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSCRIPT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsNOSCRIPT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsFORM(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsTEXTAREA(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBLOCKQUOTE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsAPPLET(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsOBJECT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsDIV(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSPAN(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsINPUT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsQ(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsLABEL(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsH3(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsH4(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsH5(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsH6(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsADDRESS(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsXMP(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSELECT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBLINK(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsMARQUEE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsEMBED(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsBASEFONT(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsISINDEX(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsS(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsSTRIKE(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsU(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsMENU(tnod: TidyNode) -> Bool;
-}
-extern "C" {
-    pub fn tidyNodeIsDATALIST(tnod: TidyNode) -> Bool;
-}
-extern "C" {
+    #[doc = " Get the attribute ID given a tidy attribute."]
+    #[doc = " @param tattr The attribute to query."]
+    #[doc = " @result Returns the TidyAttrId of the given attribute."]
     pub fn tidyAttrGetId(tattr: TidyAttr) -> TidyAttrId;
 }
 extern "C" {
+    #[doc = " Indicates whether or not a given attribute is an event attribute."]
+    #[doc = " @param tattr The attribute to query."]
+    #[doc = " @result Returns a bool indicating whether or not the attribute is an event."]
     pub fn tidyAttrIsEvent(tattr: TidyAttr) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrIsProp(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsHREF(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsSRC(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsID(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsNAME(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsSUMMARY(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsALT(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsLONGDESC(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsUSEMAP(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsISMAP(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsLANGUAGE(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsTYPE(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsVALUE(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsCONTENT(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsTITLE(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsXMLNS(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsDATAFLD(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsWIDTH(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsHEIGHT(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsFOR(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsSELECTED(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsCHECKED(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsLANG(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsTARGET(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsHTTP_EQUIV(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsREL(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnMOUSEMOVE(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnMOUSEDOWN(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnMOUSEUP(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnCLICK(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnMOUSEOVER(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnMOUSEOUT(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnKEYDOWN(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnKEYUP(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnKEYPRESS(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnFOCUS(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsOnBLUR(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsBGCOLOR(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsLINK(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsALINK(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsVLINK(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsTEXT(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsSTYLE(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsABBR(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsCOLSPAN(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
-    pub fn tidyAttrIsROWSPAN(tattr: TidyAttr) -> Bool;
-}
-extern "C" {
+    #[doc = " Get an instance of TidyAttr by specifying an attribute ID."]
+    #[doc = " @result Returns a TidyAttr instance."]
     pub fn tidyAttrGetById(tnod: TidyNode, attId: TidyAttrId) -> TidyAttr;
 }
 extern "C" {
-    pub fn tidyAttrGetHREF(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Get the type of node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns the type of node as TidyNodeType."]
+    pub fn tidyNodeGetType(tnod: TidyNode) -> TidyNodeType;
 }
 extern "C" {
-    pub fn tidyAttrGetSRC(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Get the name of the node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a string indicating the name of the node."]
+    pub fn tidyNodeGetName(tnod: TidyNode) -> ctmbstr;
 }
 extern "C" {
-    pub fn tidyAttrGetID(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Indicates whether or not a node is a text node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a bool indicating whether or not the node is a text node."]
+    pub fn tidyNodeIsText(tnod: TidyNode) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetNAME(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Indicates whether or not the node is a propriety type."]
+    #[doc = " @result Returns a bool indicating whether or not the node is a proprietary type."]
+    pub fn tidyNodeIsProp(tdoc: TidyDoc, tnod: TidyNode) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetSUMMARY(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Indicates whether or not a node represents and HTML header element, such"]
+    #[doc = " as h1, h2, etc."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns a bool indicating whether or not the node is an HTML header."]
+    pub fn tidyNodeIsHeader(tnod: TidyNode) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetALT(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Indicates whether or not the node has text."]
+    #[doc = " @result Returns the type of node as TidyNodeType."]
+    pub fn tidyNodeHasText(tdoc: TidyDoc, tnod: TidyNode) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetLONGDESC(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Gets the text of a node and places it into the given TidyBuffer. The text will be terminated with a `TidyNewline`."]
+    #[doc = " If you want the raw utf-8 stream see `tidyNodeGetValue()`."]
+    #[doc = " @result Returns a bool indicating success or not."]
+    pub fn tidyNodeGetText(tdoc: TidyDoc, tnod: TidyNode, buf: *mut TidyBuffer) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetUSEMAP(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Get the value of the node. This copies the unescaped value of this node into"]
+    #[doc = " the given TidyBuffer at UTF-8."]
+    #[doc = " @result Returns a bool indicating success or not."]
+    pub fn tidyNodeGetValue(tdoc: TidyDoc, tnod: TidyNode, buf: *mut TidyBuffer) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetISMAP(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Get the tag ID of the node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns the tag ID of the node as TidyTagId."]
+    pub fn tidyNodeGetId(tnod: TidyNode) -> TidyTagId;
 }
 extern "C" {
-    pub fn tidyAttrGetLANGUAGE(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Get the line number where the node occurs."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns the line number."]
+    pub fn tidyNodeLine(tnod: TidyNode) -> uint;
 }
 extern "C" {
-    pub fn tidyAttrGetTYPE(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Get the column location of the node."]
+    #[doc = " @param tnod The node to query."]
+    #[doc = " @result Returns the column location of the node."]
+    pub fn tidyNodeColumn(tnod: TidyNode) -> uint;
 }
 extern "C" {
-    pub fn tidyAttrGetVALUE(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Given a message code, return the text key that represents it."]
+    #[doc = " @param code The error code to lookup."]
+    #[doc = " @result The string representing the error code."]
+    pub fn tidyErrorCodeAsKey(code: uint) -> ctmbstr;
 }
 extern "C" {
-    pub fn tidyAttrGetCONTENT(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Given a text key representing a message code, return the uint that"]
+    #[doc = " represents it."]
+    #[doc = ""]
+    #[doc = " @remark We establish that for external purposes, the API will ensure that"]
+    #[doc = "         string keys remain consistent. *Never* count on the integer value"]
+    #[doc = "         of a message code. Always use this function to ensure that the"]
+    #[doc = "         integer is valid if you need one."]
+    #[doc = " @param code The string representing the error code."]
+    #[doc = " @result Returns an integer that represents the error code, which can be"]
+    #[doc = "         used to lookup Tidy's built-in strings. If the provided string does"]
+    #[doc = "         not have a matching message code, then UINT_MAX will be returned."]
+    pub fn tidyErrorCodeFromKey(code: ctmbstr) -> uint;
 }
 extern "C" {
-    pub fn tidyAttrGetTITLE(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Tells Tidy to use a different language for output."]
+    #[doc = " @param  languageCode A Windows or POSIX language code, and must match"]
+    #[doc = "         a TIDY_LANGUAGE for an installed language."]
+    #[doc = " @result Indicates that a setting was applied, but not necessarily the"]
+    #[doc = "         specific request, i.e., true indicates a language and/or region"]
+    #[doc = "         was applied. If es_mx is requested but not installed, and es is"]
+    #[doc = "         installed, then es will be selected and this function will return"]
+    #[doc = "         true. However the opposite is not true; if es is requested but"]
+    #[doc = "         not present, Tidy will not try to select from the es_XX variants."]
+    pub fn tidySetLanguage(languageCode: ctmbstr) -> Bool;
 }
 extern "C" {
-    pub fn tidyAttrGetXMLNS(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Gets the current language used by Tidy."]
+    #[doc = " @result Returns a string indicating the currently set language."]
+    pub fn tidyGetLanguage() -> ctmbstr;
 }
 extern "C" {
-    pub fn tidyAttrGetDATAFLD(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Provides a string given `messageType` in the current localization for"]
+    #[doc = " `quantity`. Some strings have one or more plural forms, and this function"]
+    #[doc = " will ensure that the correct singular or plural form is returned for the"]
+    #[doc = " specified quantity."]
+    #[doc = " @result Returns the desired string."]
+    pub fn tidyLocalizedStringN(messageType: uint, quantity: uint) -> ctmbstr;
 }
 extern "C" {
-    pub fn tidyAttrGetWIDTH(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Provides a string given `messageType` in the current localization for the"]
+    #[doc = " single case."]
+    #[doc = " @param messageType The message type."]
+    #[doc = " @result Returns the desired string."]
+    pub fn tidyLocalizedString(messageType: uint) -> ctmbstr;
 }
 extern "C" {
-    pub fn tidyAttrGetHEIGHT(tnod: TidyNode) -> TidyAttr;
+    #[doc = " Provides a string given `messageType` in the default localization (which"]
+    #[doc = " is `en`)."]
+    #[doc = " @param messageType The message type."]
+    #[doc = " @result Returns the desired string."]
+    pub fn tidyDefaultString(messageType: uint) -> ctmbstr;
 }
-extern "C" {
-    pub fn tidyAttrGetFOR(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetSELECTED(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetCHECKED(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetLANG(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetTARGET(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetHTTP_EQUIV(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetREL(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnMOUSEMOVE(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnMOUSEDOWN(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnMOUSEUP(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnCLICK(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnMOUSEOVER(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnMOUSEOUT(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnKEYDOWN(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnKEYUP(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnKEYPRESS(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnFOCUS(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetOnBLUR(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetBGCOLOR(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetLINK(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetALINK(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetVLINK(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetTEXT(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetSTYLE(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetABBR(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetCOLSPAN(tnod: TidyNode) -> TidyAttr;
-}
-extern "C" {
-    pub fn tidyAttrGetROWSPAN(tnod: TidyNode) -> TidyAttr;
-}
+#[doc = " @name Forward declarations and typedefs."]
+#[doc = " @{"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _TidyBuffer {
+    #[doc = "< Memory allocator"]
     pub allocator: *mut TidyAllocator,
+    #[doc = "< Pointer to bytes"]
     pub bp: *mut byte,
+    #[doc = "< Number of bytes currently in use"]
     pub size: uint,
+    #[doc = "< Number of bytes allocated"]
     pub allocated: uint,
+    #[doc = "< Offset of current input position"]
     pub next: uint,
 }
 extern "C" {
+    #[doc = " Initialize data structure using the default allocator"]
     pub fn tidyBufInit(buf: *mut TidyBuffer);
 }
 extern "C" {
+    #[doc = " Initialize data structure using the given custom allocator"]
     pub fn tidyBufInitWithAllocator(buf: *mut TidyBuffer, allocator: *mut TidyAllocator);
 }
 extern "C" {
+    #[doc = " Free current buffer, allocate given amount, reset input pointer,"]
+    #[doc = "use the default allocator"]
     pub fn tidyBufAlloc(buf: *mut TidyBuffer, allocSize: uint);
 }
 extern "C" {
-    pub fn tidyBufAllocWithAllocator(
-        buf: *mut TidyBuffer,
-        allocator: *mut TidyAllocator,
-        allocSize: uint,
-    );
+    #[doc = " Free current buffer, allocate given amount, reset input pointer,"]
+    #[doc = "use the given custom allocator"]
+    pub fn tidyBufAllocWithAllocator(buf: *mut TidyBuffer, allocator: *mut TidyAllocator, allocSize: uint);
 }
 extern "C" {
+    #[doc = " Expand buffer to given size."]
+    #[doc = "  Chunk size is minimum growth. Pass 0 for default of 256 bytes."]
     pub fn tidyBufCheckAlloc(buf: *mut TidyBuffer, allocSize: uint, chunkSize: uint);
 }
 extern "C" {
+    #[doc = " Free current contents and zero out"]
     pub fn tidyBufFree(buf: *mut TidyBuffer);
 }
 extern "C" {
+    #[doc = " Set buffer bytes to 0"]
     pub fn tidyBufClear(buf: *mut TidyBuffer);
 }
 extern "C" {
+    #[doc = " Attach to existing buffer"]
     pub fn tidyBufAttach(buf: *mut TidyBuffer, bp: *mut byte, size: uint);
 }
 extern "C" {
+    #[doc = " Detach from buffer.  Caller must free."]
     pub fn tidyBufDetach(buf: *mut TidyBuffer);
 }
 extern "C" {
+    #[doc = " Append bytes to buffer.  Expand if necessary."]
     pub fn tidyBufAppend(buf: *mut TidyBuffer, vp: *mut ::std::os::raw::c_void, size: uint);
 }
 extern "C" {
+    #[doc = " Append one byte to buffer.  Expand if necessary."]
     pub fn tidyBufPutByte(buf: *mut TidyBuffer, bv: byte);
 }
 extern "C" {
+    #[doc = " Get byte from end of buffer"]
     pub fn tidyBufPopByte(buf: *mut TidyBuffer) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    #[doc = " Get byte from front of buffer.  Increment input offset."]
     pub fn tidyBufGetByte(buf: *mut TidyBuffer) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    #[doc = " At end of buffer?"]
     pub fn tidyBufEndOfInput(buf: *mut TidyBuffer) -> Bool;
 }
 extern "C" {
+    #[doc = " Put a byte back into the buffer.  Decrement input offset."]
     pub fn tidyBufUngetByte(buf: *mut TidyBuffer, bv: byte);
 }
 extern "C" {
+    #[doc = " Initialize a buffer input source"]
     pub fn tidyInitInputBuffer(inp: *mut TidyInputSource, buf: *mut TidyBuffer);
 }
 extern "C" {
+    #[doc = " Initialize a buffer output sink"]
     pub fn tidyInitOutputBuffer(outp: *mut TidyOutputSink, buf: *mut TidyBuffer);
 }
 pub type __builtin_va_list = [__va_list_tag; 1usize];
