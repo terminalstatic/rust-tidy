@@ -1,0 +1,3 @@
+[submodule "tidy-sys/tidy-html5"]
+	path = tidy-sys/tidy-html5
+	url = https://github.com/htacg/tidy-html5
