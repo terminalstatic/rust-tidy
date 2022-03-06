@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
 
     let out_dir = std::env::var("OUT_DIR").unwrap();
-    dbg!(&lib.include_paths);
+    
     if lib.include_paths.len() == 0 {
         panic!("No include dir found, can't find tidy.h or tidybuffio.h")
     }
