@@ -2,15 +2,15 @@
 //! use std::boxed::Box;
 //! use std::error::Error;
 //! use tidy::*;
-//! 
+//!
 //! # pub fn main() -> Result<(), Box<dyn Error>> {
 //! let xml = "<test>5 < 6 and 9 > 7</test>";
 //! let tidy = Tidy::new()?;
 //! tidy.opt_set_bool(TidyOptionId::TidyXmlTags, true)?;
 //! tidy.set_char_encoding("utf8")?;
-//! 
+//!
 //! tidy.parse_string(xml.as_bytes().to_vec())?;
-//! 
+//!
 //! tidy.clean_and_repair()?;
 //! match tidy.run_diagnostics() {
 //!   Ok(v) => match v {
@@ -21,7 +21,7 @@
 //!   },
 //!   Err(e) => return Err(Box::new(e)),
 //! }
-//! 
+//!
 //! tidy.save_buffer()?;
 //! println!("\nDiagnostics:\n\n {}", TidyUtil::errbuf_as_string(&tidy));
 //! print!("{}", String::from_utf8_lossy(&TidyUtil::output_as_vector(&tidy).unwrap()));
@@ -64,6 +64,7 @@ impl fmt::Display for TidySeverity {
   }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct TidyError {
   severity: TidySeverity,
@@ -223,7 +224,8 @@ impl Tidy {
   /// **config_file**	The complete path to the file to load.
   pub fn load_config(&self, config_file: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidyLoadConfig(self.tdoc, CString::new(config_file).unwrap().as_ptr()) {
+      let c_config_file = CString::new(config_file).unwrap();
+      match tidyLoadConfig(self.tdoc, c_config_file.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         _ => Err(TidyError {
           severity: TidySeverity::Severe,
@@ -254,7 +256,8 @@ impl Tidy {
 
   pub fn set_char_encoding(&self, encnam: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidySetCharEncoding(self.tdoc, CString::new(encnam).unwrap().as_ptr()) {
+      let c_encnam = CString::new(encnam).unwrap();
+      match tidySetCharEncoding(self.tdoc, c_encnam.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         _ => Err(TidyError {
           severity: TidySeverity::Severe,
@@ -274,7 +277,8 @@ impl Tidy {
   /// Returns TidySeverity::Success upon success, or a TidyError if there was an error.
   pub fn set_in_char_encoding(&self, encnam: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidySetInCharEncoding(self.tdoc, CString::new(encnam).unwrap().as_ptr()) {
+      let c_encnam = CString::new(encnam).unwrap();
+      match tidySetInCharEncoding(self.tdoc, c_encnam.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         1 => Ok(TidySeverity::Warning),
         2 => Ok(TidySeverity::Error),
@@ -296,7 +300,8 @@ impl Tidy {
   /// Returns TidySeverity::Success upon success, or a TidyError if there was an error.
   pub fn set_out_char_encoding(&self, encnam: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidySetOutCharEncoding(self.tdoc, CString::new(encnam).unwrap().as_ptr()) {
+      let c_encnam = CString::new(encnam).unwrap();
+      match tidySetOutCharEncoding(self.tdoc, c_encnam.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         _ => Err(TidyError {
           severity: TidySeverity::Severe,
@@ -347,7 +352,8 @@ impl Tidy {
   /// # Returns
   /// The TidyOption of the given optname.
   pub fn get_option_by_name(&self, optnam: &str) -> TidyOption {
-    unsafe { tidyGetOptionByName(self.tdoc, CString::new(optnam).unwrap().as_ptr()) }
+    let c_optnam = CString::new(optnam).unwrap();
+    unsafe { tidyGetOptionByName(self.tdoc, c_optnam.as_ptr()) }
   }
 
   ///   Copy current configuration settings from one document to another.
@@ -503,7 +509,8 @@ impl Tidy {
   /// # Returns
   /// The TidyOptionId of the given optname.
   pub fn opt_get_id_for_name(optnam: &str) -> TidyOptionId {
-    unsafe { tidyOptGetIdForName(CString::new(optnam).unwrap().as_ptr()) }
+    let c_optnam = CString::new(optnam).unwrap();
+    unsafe { tidyOptGetIdForName(c_optnam.as_ptr()) }
   }
 
   /// Get current option value as an integer.
@@ -547,11 +554,9 @@ impl Tidy {
   /// **val**	The value to set.
   pub fn opt_parse_value(&self, optnam: &str, val: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidyOptParseValue(
-        self.tdoc,
-        CString::new(optnam).unwrap().as_ptr(),
-        CString::new(val).unwrap().as_ptr(),
-      ) {
+      let c_optnam = CString::new(optnam).unwrap();
+      let c_val = CString::new(val).unwrap();
+      match tidyOptParseValue(self.tdoc, c_optnam.as_ptr(), c_val.as_ptr()) {
         Bool_yes => Ok(TidySeverity::Success),
         _ => Err(TidyError {
           severity: TidySeverity::Severe,
@@ -658,7 +663,8 @@ impl Tidy {
   /// Returns a TidySeverity::Success indicating success or TidyError on failure.
   pub fn opt_set_value(&self, optid: TidyOptionId, val: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidyOptSetValue(self.tdoc, optid, CString::new(val).unwrap().as_ptr()) {
+      let c_val = CString::new(val).unwrap();
+      match tidyOptSetValue(self.tdoc, optid, c_val.as_ptr()) {
         Bool_yes => Ok(TidySeverity::Success),
         _ => Err(TidyError {
           severity: TidySeverity::Severe,
@@ -750,7 +756,8 @@ impl Tidy {
   /// **filename**	The filename to parse.
   pub fn parse_file(&self, filename: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidyParseFile(self.tdoc, CString::new(filename).unwrap().as_ptr()) {
+      let c_filename = CString::new(filename).unwrap();
+      match tidyParseFile(self.tdoc, c_filename.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         1 => Ok(TidySeverity::Warning),
         2 => Ok(TidySeverity::Error),
@@ -815,7 +822,8 @@ impl Tidy {
   /// **cfgfil**	The filename to save the configuration to.
   pub fn opt_save_file(&self, cfgfil: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidyOptSaveFile(self.tdoc, CString::new(cfgfil).unwrap().as_ptr()) {
+      let c_cfgfil = CString::new(cfgfil).unwrap();
+      match tidyOptSaveFile(self.tdoc, c_cfgfil.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         1 => Ok(TidySeverity::Warning),
         2 => Ok(TidySeverity::Error),
@@ -852,7 +860,8 @@ impl Tidy {
   /// **filename**	The destination file name.
   pub fn save_file(&self, filename: &str) -> Result<TidySeverity, TidyError> {
     unsafe {
-      match tidySaveFile(self.tdoc, CString::new(filename).unwrap().as_ptr()) {
+      let c_filename = CString::new(filename).unwrap();
+      match tidySaveFile(self.tdoc, c_filename.as_ptr()) {
         0 => Ok(TidySeverity::Success),
         1 => Ok(TidySeverity::Warning),
         2 => Ok(TidySeverity::Error),

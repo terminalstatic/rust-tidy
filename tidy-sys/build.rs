@@ -37,12 +37,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
 
     let out_dir = std::env::var("OUT_DIR").unwrap();
-
+    dbg!(&lib.include_paths);
     if lib.include_paths.len() == 0 {
         panic!("No include dir found, can't find tidy.h/buffio.h")
     }
 
-    let h_files: [&str; 2] = ["tidy.h", "buffio.h"];
+    let h_files: [&str; 2] = ["tidy.h", "tidybuffio.h"];
     let mut includes: [Option<String>; 2] = Default::default();
 
     for (i, find) in h_files.iter().enumerate() {
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     if !(includes[0].is_some() && includes[1].is_some()) {
-        panic!("Required include files tidy.h/buffio.h not found")
+        panic!("Required include files tidy.h or (tidy)buffio.h not found")
     }
 
     let wrapper_path = path::Path::new(&out_dir).join("wrapper.h");
@@ -81,6 +81,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let bindings = bindgen::Builder::default()
         .header(wrapper_path.to_path_buf().to_str().unwrap())
+        .clang_arg(format!("{}{}", "-I", lib.include_paths[0]
+        .clone()
+        .into_os_string()
+        .to_str()
+        .unwrap()))
         .rustified_enum("^Tidy.*")
         .whitelist_function("^tidy.*")
         .whitelist_var("^tidy.*")
