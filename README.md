@@ -24,4 +24,10 @@ Most of the time it should be possible to add the library to your dependencies l
 [dependencies]
 tidy = { git = "https://github.com/terminalstatic/rust-tidy", branch = "master" }
 ````
+or pin it with
+````
+[dependencies]
+tidy = { git = "https://github.com/terminalstatic/rust-tidy", tag = "tidy-v0.1.7" }
+````
+
 However the build script might not work everywhere (wrote it for ubuntu and macOS). 
