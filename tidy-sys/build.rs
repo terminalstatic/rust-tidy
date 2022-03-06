@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     dbg!(&lib.include_paths);
     if lib.include_paths.len() == 0 {
-        panic!("No include dir found, can't find tidy.h/buffio.h")
+        panic!("No include dir found, can't find tidy.h or tidybuffio.h")
     }
 
     let h_files: [&str; 2] = ["tidy.h", "tidybuffio.h"];
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     if !(includes[0].is_some() && includes[1].is_some()) {
-        panic!("Required include files tidy.h or (tidy)buffio.h not found")
+        panic!("Required include files tidy.h or tidybuffio.h not found")
     }
 
     let wrapper_path = path::Path::new(&out_dir).join("wrapper.h");
