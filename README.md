@@ -21,14 +21,13 @@ on mac with
 
 ## Usage
 
-Most of the time it should be possible to add the library to your dependencies like this: 
 ````
 # Cargo.toml
 
 [dependencies]
 tidy = { git = "https://github.com/terminalstatic/rust-tidy", branch = "master" }
 ````
-or pin it with
+or
 ````
 # Cargo.toml
 
