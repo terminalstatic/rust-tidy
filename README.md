@@ -1,16 +1,16 @@
 # rust-tidy
 
-A wrapper library for [Html Tidy](https://github.com/htacg/tidy-html5) in rust.
+A wrapper library for [HTML Tidy](https://github.com/htacg/tidy-html5) in rust.
 
 ## Overview
 
-Html tidy corrects and cleans up HTML and XML documents by fixing markup errors and upgrading legacy code to modern standards.<br />
-This wrapper provides access to a major subset of the html tidy api.<br />
+[HTML Tidy](https://github.com/htacg/tidy-html5) corrects and cleans up HTML and XML documents by fixing markup errors and upgrading legacy code to modern standards.<br />
+This wrapper provides access to a major subset of the [HTML Tidy](https://github.com/htacg/tidy-html5) api.<br />
 Please be aware that this lib is a pet project and therefore not thoroughly tested.<br />
 
 ## Requirements
 
-Requires common build tools and libtidy (>=5.2.0), 
+Requires the usual build tools and libtidy (>=5.2.0), 
 for example on ubuntu install with
 
 ````sudo apt install libtidy-dev````
