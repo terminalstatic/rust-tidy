@@ -118,7 +118,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     drop(file_w);
 
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=path/to/Cargo.lock");
+    println!("cargo:rerun-if-changed=../Cargo.lock");
     println!("cargo:rerun-if-changed=wrapper.h");
     println!("cargo:rustc-link-lib=tidy");
     Ok(())
