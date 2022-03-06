@@ -53,8 +53,7 @@ fn test_sub() -> Result<(), Box<dyn Error>> {
   tidy.opt_set_bool(TidyOptionId::TidyXmlDecl, true)?;
 
   let option: TidyOption = tidy.get_option(TidyOptionId::TidyForceOutput);
-    println!("ID: {:?}", Tidy::opt_get_id(option));
-  println!("Option: {:?}", option);
+  println!("Option ID: {:?}", Tidy::opt_get_id(option));
   tidy.set_char_encoding("utf8")?;
   tidy.set_out_char_encoding("utf8")?;
   tidy.parse_string(xml.as_bytes().to_vec())?;
