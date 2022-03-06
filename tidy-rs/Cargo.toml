@@ -17,4 +17,3 @@ bindgen = "0.57"
 cc = { version = "1.0", features = ["parallel"] }
 pkg-config = "0.3"
 glob = "0.3.0"
-
