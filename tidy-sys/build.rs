@@ -49,6 +49,7 @@ fn pkg_config() -> Vec<path::PathBuf> {
 fn main() -> Result<(), Box<dyn Error>> {
     let out_fn = "src/bindings.rs";
     let out_dir = std::env::var("OUT_DIR").unwrap();
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
     let wrapper_path = path::Path::new(&out_dir).join("wrapper.h");
 
     let includes_path = if cfg!(feature = "pkg-config") {
@@ -56,7 +57,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     } else {
         let dst = cmake::Config::new("tidy-html5").define("TIDY_COMPAT_HEADERS", "ON").build();
         println!("cargo:rustc-link-search=native={}/lib", dst.display());
-        println!("cargo:rustc-link-lib=static=tidy");
+        if target_os == "windows" {
+            println!("cargo:rustc-link-lib=static=tidy_static");
+        } else {
+            println!("cargo:rustc-link-lib=static=tidy");
+        }
         let mut include_path = path::PathBuf::new();
         include_path.push(dst);
         include_path.push("include");
