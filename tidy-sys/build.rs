@@ -31,7 +31,10 @@ fn strip_to_include(mut paths: Paths, prefix: &str) -> Option<String> {
 
 #[cfg(feature = "pkg-config")]
 fn pkg_config() -> Vec<path::PathBuf> {
-    let lib = pkg_config::Config::new().atleast_version("5.2.0").probe("tidy").unwrap();
+    let lib = pkg_config::Config::new()
+        .atleast_version("5.2.0")
+        .probe("tidy")
+        .unwrap();
 
     if lib.include_paths.len() == 0 {
         panic!("No include dir found, can't find tidy.h/buffio.h")
@@ -55,7 +58,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let includes_path = if cfg!(feature = "pkg-config") {
         pkg_config()
     } else {
-        let dst = cmake::Config::new("tidy-html5").define("TIDY_COMPAT_HEADERS", "ON").build();
+        let dst = cmake::Config::new("tidy-html5")
+            .define("TIDY_COMPAT_HEADERS", "ON")
+            .build();
         println!("cargo:rustc-link-search=native={}/lib", dst.display());
         if target_os == "windows" {
             println!("cargo:rustc-link-lib=static=tidy_static");
@@ -75,7 +80,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     for (i, find) in h_files.iter().enumerate() {
         for dir in &includes_path {
             let fileglob = dir.join("**").join(find);
-            let mut i1 = strip_to_include(glob(fileglob.to_str().unwrap()).unwrap(), dir.clone().into_os_string().to_str().unwrap());
+            let mut i1 = strip_to_include(
+                glob(fileglob.to_str().unwrap()).unwrap(),
+                dir.clone().into_os_string().to_str().unwrap(),
+            );
             if i1.is_some() {
                 includes[i] = i1.take();
                 break;
@@ -87,9 +95,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         panic!("Required include files tidy.h/buffio.h not found")
     }
 
-    let mut file_w = OpenOptions::new().create(true).write(true).truncate(true).open(&wrapper_path)?;
+    let mut file_w = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(&wrapper_path)?;
 
-    let h_text: String = format!("#include <{}>\n#include <{}>\n", includes[0].as_ref().unwrap(), includes[1].as_ref().unwrap());
+    let h_text: String = format!(
+        "#include <{}>\n#include <{}>\n",
+        includes[0].as_ref().unwrap(),
+        includes[1].as_ref().unwrap()
+    );
 
     file_w.write_all(h_text.as_bytes())?;
     drop(file_w);
@@ -105,7 +121,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         .generate()
         .expect("Unable to generate bindings");
 
-    bindings.write_to_file(out_fn).expect("Couldn't write bindings!");
+    bindings
+        .write_to_file(out_fn)
+        .expect("Couldn't write bindings!");
 
     let re = Regex::new(r"(?s)pub struct _TidyOption \{.+?\}").unwrap();
     let mut file_r = OpenOptions::new().read(true).open(out_fn)?;
@@ -127,8 +145,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     drop(file_w);
 
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=path/to/Cargo.lock");
-    println!("cargo:rerun-if-changed=wrapper.h");
 
     Ok(())
 }
